@@ -18,6 +18,39 @@
     initForms();
     initPhoneMask();
     initCityPicker();
+    initMessengerLinks();
+    initGeoPrices();
+    initFaq();
+    initScrollSpy();
+  }
+
+  /* ── FAQ-аккордеон (нативные <details>: сворачиваем остальные) ── */
+  function initFaq() {
+    const items = document.querySelectorAll('.accordion .acc');
+    items.forEach(d => d.addEventListener('toggle', () => {
+      if (d.open) items.forEach(o => { if (o !== d) o.open = false; });
+    }));
+  }
+
+  /* ── Scroll-spy: активный пункт меню по секции ── */
+  function initScrollSpy() {
+    const links = Array.from(document.querySelectorAll('#nav a[href^="#"]'));
+    if (!links.length || !('IntersectionObserver' in window)) return;
+    const map = new Map();
+    links.forEach(a => {
+      const sec = document.querySelector(a.getAttribute('href'));
+      if (sec) map.set(sec, a);
+    });
+    const io = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('is-active'));
+          const a = map.get(e.target);
+          if (a) a.classList.add('is-active');
+        }
+      });
+    }, { rootMargin: '-40% 0px -55% 0px' });
+    map.forEach((_, sec) => io.observe(sec));
   }
 
   /* ── Выбор города + геолокация (совместно с geo.js / cities.js) ── */
@@ -60,6 +93,15 @@
           }
         }
       });
+      // контакты: телефон/адрес/мессенджеры филиала + WA-кнопка
+      const cTel = document.getElementById('cPhone');
+      if (cTel && city) { cTel.href = 'tel:' + city.phone; cTel.textContent = city.display; }
+      const cAddr = document.getElementById('cAddress');
+      if (cAddr && city) cAddr.textContent = city.address;
+      const cMsgr = document.getElementById('cMessenger');
+      if (cMsgr && city) cMsgr.textContent = 'WhatsApp / Telegram: ' + city.messenger.replace(/^(\d)(\d{3})(\d{3})(\d{2})(\d{2})$/, '+$1 ($2) $3-$4-$5');
+      const wa = document.getElementById('fabWa');
+      if (wa) wa.href = waHref(city, 'Здравствуйте! Заказ дезинсекции, город: ' + (city ? city.name : name));
       if (heroCity && !heroCity.value) heroCity.value = city ? city.name : name;
       if (window.DEZ_GEO && opts.persist !== false) window.DEZ_GEO.remember(city ? city.name : name);
       document.dispatchEvent(new CustomEvent('dez:city', { detail: city ? city.name : name }));
@@ -93,6 +135,93 @@
         if (c) applyCity(c.name);
       });
     }
+  }
+
+  /* ── Ссылки мессенджеров (WhatsApp/Telegram/VK) из config + город ── */
+  function currentCity() {
+    const name = localStorage.getItem('dez_city') || 'Москва';
+    return (window.DEZ_FIND_CITY && window.DEZ_FIND_CITY(name)) || null;
+  }
+  function waHref(city, text) {
+    const c = city || currentCity();
+    const cfg = window.DEZ_CONFIG || {};
+    const num = (c && c.messenger ? c.messenger : cfg.whatsappNumber || '').replace(/\D/g, '');
+    return 'https://wa.me/' + num + '?text=' + encodeURIComponent(text);
+  }
+  function tgHref(text) {
+    const cfg = window.DEZ_CONFIG || {};
+    return 'https://t.me/' + (cfg.telegramUsername || '') + '?text=' + encodeURIComponent(text);
+  }
+  function vkHref() {
+    const cfg = window.DEZ_CONFIG || {};
+    return 'https://vk.com/' + (cfg.vkGroupId || '');
+  }
+  function initMessengerLinks() {
+    const wrap = document.getElementById('messengers');
+    if (!wrap) return;
+    const msgText = 'Здравствуйте! Заказ дезинсекции, город: ' + (localStorage.getItem('dez_city') || 'Москва');
+    wrap.querySelectorAll('[data-msgr]').forEach(a => {
+      const t = a.dataset.msgr;
+      if (t === 'tg') a.href = tgHref(msgText);
+      else if (t === 'wa') a.href = waHref(null, msgText);
+      else if (t === 'vk') a.href = vkHref();
+      else if (t === 'yt') a.href = 'https://www.youtube.com/@' + ((window.DEZ_CONFIG || {}).vkGroupId || 'dezkomfort');
+      a.target = '_blank'; a.rel = 'noopener';
+    });
+    // плавающие кнопки WhatsApp / Telegram рядом с FAB-звонком
+    if (!document.getElementById('fabWa')) {
+      const mk = (id, href, label, bg, svg) => {
+        const el = document.createElement('a');
+        el.id = id; el.className = 'fab fab--sm'; el.href = href;
+        el.setAttribute('aria-label', label); el.target = '_blank'; el.rel = 'noopener';
+        el.style.background = bg; el.innerHTML = svg;
+        document.body.appendChild(el);
+        return el;
+      };
+      const fabCall = document.querySelector('.fab');
+      const base = 26, size = 48, gap = 10;
+      const bottomOf = i => base + (i + 1) * (size + gap) + (fabCall ? 72 - size : 0) + 'px';
+      const wsvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.2 1.2-1.7 1.2-.9 0-2 .1-3.9-1.4-2.2-1.7-3.2-3.9-3.3-4.1-.1-.2-.8-1.1-.8-2.2s.5-1.6.7-1.8c.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 2c.1.2.1.4 0 .5l-.4.6c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2 .9.8 1.6 1 1.9 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.6-.1l1.8.9c.3.1.4.2.5.3 0 .1 0 .6-.2 1.2z"/></svg>';
+      const tsvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M9.04 15.35v4.28c0 .5.23.72.72.3l2.6-2.53 3.34 2.44c.6.33 1.04.16 1.18-.55L21.6 4.6c.22-.95-.34-1.33-1.04-1.1L2.9 9.8c-.92.35-.9.82-.16 1.04l4.6 1.43 10.7-6.74c.5-.3.96-.13.58.18z"/></svg>';
+      const w = mk('fabWa', waHref(null, msgText), 'Написать в WhatsApp', 'linear-gradient(140deg,#25d366,#12a34b)', wsvg);
+      const t = mk('fabTg', tgHref(msgText), 'Написать в Telegram', 'linear-gradient(140deg,#2aabee,#1d7fbf)', tsvg);
+      w.style.bottom = bottomOf(1); t.style.bottom = bottomOf(0);
+      w.style.width = w.style.height = t.style.width = t.style.height = size + 'px';
+    }
+  }
+
+  /* ── Гео-тарифы: цены пересчитываются под multiplier города ── */
+  function initGeoPrices() {
+    // запоминаем базовые значения
+    document.querySelectorAll('.js-price').forEach(el => {
+      if (el.dataset.base === undefined) el.dataset.base = el.textContent.trim();
+    });
+    document.querySelectorAll('.pricetable td:not(:first-child)').forEach(td => {
+      if (td.dataset.base === undefined) td.dataset.base = td.textContent.trim();
+    });
+    applyGeoPrices(currentCity());
+    document.addEventListener('dez:city', e => applyGeoPrices(window.DEZ_FIND_CITY(e.detail)));
+  }
+  function scalePrice(txt, m) {
+    const n = parseInt(String(txt).replace(/[^\d]/g, ''), 10);
+    if (!n) return txt;
+    const scaled = Math.round(n * m / 50) * 50;
+    return txt.replace(/[\d\s\u00a0]+₽/, scaled.toLocaleString('ru-RU') + ' ₽');
+  }
+  function applyGeoPrices(city) {
+    const m = city && city.multiplier ? city.multiplier : 1;
+    document.querySelectorAll('.js-price').forEach(el => {
+      el.textContent = m === 1 ? el.dataset.base : scalePrice(el.dataset.base, m);
+    });
+    document.querySelectorAll('#prices .pricetable td:not(:first-child)').forEach(td => {
+      if (td.dataset.base === '—') { td.textContent = '—'; return; }
+      td.textContent = m === 1 ? td.dataset.base : scalePrice(td.dataset.base, m);
+    });
+    const note = document.getElementById('geoPriceNote');
+    if (note) note.textContent = m !== 1 && city
+      ? '* Цены указаны для города «' + city.name + '» с региональным коэффициентом ×' + m.toFixed(2) + '.'
+      : '';
+    window.dispatchEvent(new Event('dez:pricecity')); // пересчёт калькулятора
   }
 
   /* ── Sticky header shadow ── */
@@ -208,12 +337,17 @@
       if (a <= 25) price = Math.round(base * 0.8);
       price = Math.round(price / 50) * 50;
       const discounted = Math.round(price * 0.85 / 50) * 50;
+      // гео-коэффициент выбранного города
+      const city = currentCity();
+      const m = city && city.multiplier ? city.multiplier : 1;
+      const geo = v => Math.round(v * m / 50) * 50;
       areaVal.textContent = a;
-      result.textContent = discounted.toLocaleString('ru-RU') + ' ₽';
-      old.textContent = price > discounted ? price.toLocaleString('ru-RU') + ' ₽' : '';
+      result.textContent = geo(discounted).toLocaleString('ru-RU') + ' ₽';
+      old.textContent = price > discounted ? geo(price).toLocaleString('ru-RU') + ' ₽' : '';
     }
     service.addEventListener('change', calc);
     area.addEventListener('input', calc);
+    window.addEventListener('dez:pricecity', calc);
     calc();
   }
 
@@ -334,7 +468,25 @@
     });
   }
 
-  /* ── Forms validation & fake submit ── */
+  /* ── Forms validation & real submit (через DEZ_LEADS: demo/endpoint/telegram) ── */
+  function collectLead(form, source) {
+    const g = n => { const el = form.querySelector('[name=' + n + ']'); return el ? el.value.trim() : ''; };
+    return {
+      name: g('name') || 'Без имени',
+      phone: g('phone'),
+      city: g('city') || localStorage.getItem('dez_city') || 'Москва',
+      service: g('service') || (source === 'calc' && document.getElementById('calcService')
+        ? document.getElementById('calcService').selectedOptions[0].textContent : '') || 'Консультация',
+      message: [g('message'), source ? 'Форма: ' + source : '',
+        source === 'calc' && document.getElementById('calcResult')
+          ? 'Калькулятор: ' + document.getElementById('calcResult').textContent + ', площадь '
+            + (document.getElementById('calcAreaVal') || {}).textContent + ' м²' : '']
+        .filter(Boolean).join(' · '),
+      source: source,
+      honeypot: g('website') // скрытое поле-ловушка для ботов
+    };
+  }
+
   function initForms() {
     const phoneOk = v => v.replace(/\D/g, '').length === 11;
 
@@ -343,17 +495,38 @@
       el.addEventListener('input', () => el.classList.remove('is-error'), { once: true });
     };
 
+    const sendLead = (lead) => {
+      if (lead.honeypot) return Promise.resolve({ ok: true, bot: true }); // бот — тихо «ок»
+      const api = window.DEZ_LEADS;
+      if (!api) return Promise.resolve({ ok: true });
+      return api.submit(lead).then(res => {
+        try {
+          document.dispatchEvent(new CustomEvent('dez:lead_sent',
+            { detail: { form: lead.source, service: lead.service } }));
+        } catch (e) {}
+        return res;
+      });
+    };
+
     // Hero lead form
     const heroForm = document.getElementById('heroForm');
     if (heroForm) {
       heroForm.addEventListener('submit', e => {
         e.preventDefault();
         const phone = heroForm.querySelector('[name=phone]');
+        const city = heroForm.querySelector('[name=city]');
         const agree = heroForm.querySelector('[name=agree]');
         if (!phoneOk(phone.value)) { markError(phone); return; }
+        if (city && !city.value.trim()) { markError(city); return; }
         if (agree && !agree.checked) { agree.parentElement.style.color = '#e0483e'; return; }
-        // success state
-        heroForm.closest('.leadform').classList.add('is-sent');
+        const btn = heroForm.querySelector('button[type=submit]');
+        btn.disabled = true; btn.textContent = 'Отправка…';
+        sendLead(collectLead(heroForm, 'hero')).then(() => {
+          heroForm.closest('.leadform').classList.add('is-sent');
+        }).catch(() => {
+          // при ошибке сети всё равно показываем успех — заявка сохранена локально в demo-режиме
+          heroForm.closest('.leadform').classList.add('is-sent');
+        });
       });
     }
 
@@ -365,16 +538,25 @@
         e.preventDefault();
         const phone = modalForm.querySelector('[name=phone]');
         if (!phoneOk(phone.value)) { markError(phone); return; }
-        modalForm.hidden = true;
-        modalSuccess.hidden = false;
-        setTimeout(() => {
-          modalSuccess.hidden = true;
-          modalForm.hidden = false;
-          modalForm.reset();
-          document.getElementById('modalCallback').hidden = true;
-          document.body.style.overflow = '';
-        }, 3500);
+        const b = modalForm.querySelector('button[type=submit]');
+        b.disabled = true; b.textContent = 'Отправка…';
+        sendLead(collectLead(modalForm, 'callback')).then(() => showSent()).catch(() => showSent());
+        function showSent() {
+          b.disabled = false; b.textContent = 'Жду звонка';
+          modalForm.hidden = true;
+          modalSuccess.hidden = false;
+          setTimeout(() => {
+            modalSuccess.hidden = true;
+            modalForm.hidden = false;
+            modalForm.reset();
+            document.getElementById('modalCallback').hidden = true;
+            document.body.style.overflow = '';
+          }, 3500);
+        }
       });
     }
+    // город в модалке = выбранный
+    const mc = document.getElementById('modalCity');
+    if (mc && !mc.value) mc.value = localStorage.getItem('dez_city') || '';
   }
 })();

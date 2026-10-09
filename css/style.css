@@ -107,6 +107,8 @@ input,select{font-family:inherit;font-size:15px}
 .leadform__hint{font-size:14px;color:var(--muted);margin-bottom:18px}
 .field{margin-bottom:12px}
 .leadform input[type=text],.leadform input[type=tel]{width:100%;padding:13px 16px;border:2px solid var(--line);border-radius:11px;transition:.2s;background:#fbfdfc}
+.leadform select{width:100%;padding:13px 16px;border:2px solid var(--line);border-radius:11px;background:#fbfdfc;font-weight:600;color:var(--ink)}
+.leadform .field+.field{margin-top:12px}
 .leadform input:focus{outline:none;border-color:var(--green)}
 .leadform input.is-error{border-color:var(--red);animation:shake .35s}
 @keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
@@ -428,3 +430,10 @@ input[type=range]{width:100%;accent-color:var(--mint);height:6px}
   .citypick__drop { width: min(300px, 86vw); left: -6px; }
   .topbar__contacts { flex-wrap: wrap; gap: 6px 14px; }
 }
+
+/* ── Гео-цены, scroll-spy, FAB-мессенджеры (дополнения) ── */
+.geo-note{color:var(--orange);font-weight:700;font-size:13.5px;margin-top:6px}
+.nav a.is-active{background:var(--green-l);color:var(--green)}
+.fab--sm{width:48px;height:48px;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.fab--sm:hover{transform:scale(1.1)}
+@media(max-width:640px){.fab--sm{width:42px;height:42px}}

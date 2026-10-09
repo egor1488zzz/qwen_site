@@ -1,0 +1,150 @@
+<?php
+/**
+ * Дез-Комфорт · backend/api.php — реальный приём заявок (пункт 1 плана)
+ *
+ * Разверните на вашем облачном сервере (PHP 7.4+, SQLite включён по умолчанию).
+ *   nginx: location ~ \.php$ { fastcgi_pass unix:/run/php/php8.2-fpm.sock; }
+ *   затем в js/config.js: leadMode:'endpoint', leadEndpoint:'/api.php'
+ *
+ * Что делает:
+ *  - принимает POST JSON {name, phone, city, service, message, source}
+ *  - сохраняет заявку в SQLite (backend/leads.db)
+ *  - шлёт уведомление менеджеру в Telegram (если заданы константы)
+ *  - опционально дублирует в amoCRM/Bitrix24 webhook (CRM_WEBHOOK)
+ *  - GET ?token=SECRET&export=csv — выгрузка всех заявок CSV
+ */
+
+// ══ НАСТРОЙТЕ ЭТИ ЗНАЧЕНИЯ ════════════════════════════════════
+define('ADMIN_TOKEN', 'change-me-strong-token');       // токен для просмотра/выгрузки
+define('TELEGRAM_BOT_TOKEN', '');                       // '123:AA...' — пусто = не слать
+define('TELEGRAM_CHAT_ID', '');                         // '-100...'
+define('CRM_WEBHOOK', '');                              // URL вебхука amoCRM/Битрикс24, '' = выкл
+define('DB_FILE', __DIR__ . '/leads.db');
+// ═══════════════════════════════════════════════════════════════
+
+header('Content-Type: application/json; charset=utf-8');
+
+/* CORS — разрешить фронт с GitHub Pages и домена компании */
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if ($origin) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type');
+}
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+
+$method = $_SERVER['REQUEST_METHOD'];
+
+/* ── Хранилище ─────────────────────────────────────────────── */
+function db() {
+    static $pdo = null;
+    if ($pdo === null) {
+        $pdo = new PDO('sqlite:' . DB_FILE);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec('CREATE TABLE IF NOT EXISTS leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            created TEXT NOT NULL,
+            name TEXT, phone TEXT, city TEXT, service TEXT,
+            message TEXT, source TEXT, status TEXT DEFAULT "new",
+            ip TEXT, ua TEXT
+        )');
+    }
+    return $pdo;
+}
+
+/* ── Выгрузка заявок (GET ?token=...&export=csv) ───────────── */
+if ($method === 'GET') {
+    if (($_GET['token'] ?? '') !== ADMIN_TOKEN) {
+        http_response_code(403);
+        echo json_encode(['error' => 'forbidden']); exit;
+    }
+    $rows = db()->query('SELECT * FROM leads ORDER BY id DESC')->fetchAll(PDO::FETCH_ASSOC);
+    if (($_GET['export'] ?? '') === 'csv') {
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="leads.csv"');
+        $out = fopen('php://output', 'w');
+        fwrite($out, "\xEF\xBB\xBF");
+        fputcsv($out, ['ID','Дата','Имя','Телефон','Город','Услуга','Сообщение','Источник','Статус'], ';');
+        foreach ($rows as $r) fputcsv($out, array_values($r), ';');
+        fclose($out); exit;
+    }
+    echo json_encode(['count' => count($rows), 'leads' => $rows], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+if ($method !== 'POST') { http_response_code(405); echo json_encode(['error'=>'method']); exit; }
+
+/* ── Приём заявки ──────────────────────────────────────────── */
+$in = json_decode(file_get_contents('php://input'), true) ?: [];
+
+$name    = trim($in['name']    ?? '');
+$phone   = preg_replace('/\D+/', '', $in['phone'] ?? '');
+$city    = trim($in['city']    ?? '');
+$service = trim($in['service'] ?? 'Не указана');
+$message = trim($in['message'] ?? '');
+$source  = trim($in['source']  ?? 'site');
+
+if (strlen($phone) !== 11 || mb_strlen($city) > 60 || mb_strlen($message) > 1000) {
+    http_response_code(422);
+    echo json_encode(['ok' => false, 'error' => 'invalid data']); exit;
+}
+/* Анти-спам: honeypot + частота с одного IP */
+if (!empty($in['website'])) { echo json_encode(['ok' => true]); exit; } // боты — тихо игнор
+session_start();
+ip_check(6); // не более 6 заявок с одного IP в минуту
+
+$stmt = db()->prepare('INSERT INTO leads (created,name,phone,city,service,message,source,ip,ua)
+    VALUES (:c,:n,:p,:ci,:s,:m,:so,:ip,:ua)');
+$stmt->execute([
+    ':c' => date('Y-m-d H:i:s'), ':n' => mb_substr($name, 0, 100), ':p' => $phone, ':ci' => $city,
+    ':s' => mb_substr($service, 0, 100), ':m' => $message, ':so' => $source,
+    ':ip' => $_SERVER['REMOTE_ADDR'] ?? '', ':ua' => substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 200),
+]);
+$id = (int)db()->lastInsertId();
+
+/* ── Уведомления (не блокируем ответ при ошибках сети) ─────── */
+try {
+    if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+        tg("🔔 Новая заявка #$id\n👤 $name\n📞 +$phone\n📍 $city\n🛠 $service" . ($message ? "\n💬 $message" : ''));
+    }
+    if (CRM_WEBHOOK) {
+        crm($id, $name, $phone, $city, $service, $message);
+    }
+} catch (Throwable $e) { error_log('dez notify: ' . $e->getMessage()); }
+
+echo json_encode(['ok' => true, 'id' => $id], JSON_UNESCAPED_UNICODE);
+
+/* ── Служебные функции ─────────────────────────────────────── */
+function ip_check(int $limitPerMinute) {
+    $key = 'lead_ts_' . md5($_SERVER['REMOTE_ADDR'] ?? 'x');
+    $now = time();
+    $ts = json_decode($_SESSION[$key] ?? '[]', true);
+    $ts = array_values(array_filter($ts, function ($t) use ($now) { return $now - $t < 60; }));
+    if (count($ts) >= $limitPerMinute) {
+        http_response_code(429);
+        echo json_encode(['ok' => false, 'error' => 'too many requests']); exit;
+    }
+    $ts[] = $now;
+    $_SESSION[$key] = json_encode($ts);
+}
+
+function tg(string $text) {
+    @file_get_contents('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/sendMessage?' . http_build_query([
+        'chat_id' => TELEGRAM_CHAT_ID, 'text' => $text, 'disable_web_page_preview' => 'true',
+    ]));
+}
+
+/* Универсальный CRM-webhook: amoCRM _webhooks или Битрикс24 incoming REST */
+function crm(int $id, string $name, string $phone, string $city, string $service, string $message) {
+    $payload = json_encode([
+        'id' => $id, 'name' => $name, 'phones' => [['value' => "+$phone", 'primary' => true]],
+        'custom_fields' => ['CITY' => $city, 'SERVICE' => $service], 'description' => $message,
+    ], JSON_UNESCAPED_UNICODE);
+    $ctx = stream_context_create(['http' => [
+        'method'  => 'POST',
+        'header'  => "Content-Type: application/json\r\n",
+        'content' => $payload,
+        'timeout' => 5,
+    ]]);
+    @file_get_contents(CRM_WEBHOOK, false, $ctx);
+}

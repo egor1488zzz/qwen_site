@@ -101,6 +101,14 @@
           <span class="citypick-field__pin">📍</span>
           <input type="text" name="city" id="heroCity" list="cityOptions" placeholder="Ваш город" autocomplete="address-level2" required>
         </div>
+        <div class="field">
+          <select name="service">
+            <option value="">Выберите услугу (необязательно)</option>
+            <option>Тараканы</option><option>Клопы</option><option>Муравьи</option><option>Блохи</option>
+            <option>Комары / клещи</option><option>Пауки / мокрицы</option><option>Пищевой объект</option><option>Другое</option>
+          </select>
+        </div>
+        <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
         <label class="agree"><input type="checkbox" name="agree" checked><span>Согласен с политикой конфиденциальности</span></label>
         <button type="submit" class="btn btn--primary btn--block">Получить консультацию</button>
         <p class="leadform__secure">🔒 Ваши данные защищены и не передаются третьим лицам</p>
@@ -138,56 +146,56 @@
         <div class="scard__icon">🪳</div>
         <h3 class="scard__title">Уничтожение тараканов</h3>
         <p class="scard__text">Полное уничтожение рыжих и чёрных тараканов холодным туманом с гарантией. Обработка вентиляции и мест скопления.</p>
-        <div class="scard__footer"><span class="scard__price">от 1 800 ₽</span><a href="#tarakany" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 1 800 ₽</span><a href="#tarakany" class="scard__link">Подробнее →</a></div>
       </article>
 
       <article class="scard">
         <div class="scard__icon">🛏️</div>
         <h3 class="scard__title">Уничтожение клопов</h3>
         <p class="scard__text">Избавление от постельных клопов за 1 визит. Обработка матрасов, каркасов, плинтусов и всех путей миграции паразитов.</p>
-        <div class="scard__footer"><span class="scard__price">от 2 200 ₽</span><a href="#klopy" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 2 200 ₽</span><a href="#klopy" class="scard__link">Подробнее →</a></div>
       </article>
 
       <article class="scard">
         <div class="scard__icon">🐜</div>
         <h3 class="scard__title">Уничтожение муравьёв</h3>
         <p class="scard__text">Уничтожение садовых и домовых муравьёв вместе с матками и колониями. Барьерная защита участка и помещения.</p>
-        <div class="scard__footer"><span class="scard__price">от 1 500 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 1 500 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
       </article>
 
       <article class="scard">
         <div class="scard__icon">🐕</div>
         <h3 class="scard__title">Уничтожение блох</h3>
         <p class="scard__text">Обработка помещений, подвалов и придомовой территории от блох. Рекомендации по обработке домашних животных.</p>
-        <div class="scard__footer"><span class="scard__price">от 1 700 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 1 700 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
       </article>
 
       <article class="scard">
         <div class="scard__icon">🦟</div>
         <h3 class="scard__title">Уничтожение комаров</h3>
         <p class="scard__text">Обработка участка от комаров и клещей методом ULV. Защита территории до 6 недель, возможность срочного выезда к празднику.</p>
-        <div class="scard__footer"><span class="scard__price">от 3 000 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 3 000 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
       </article>
 
       <article class="scard">
         <div class="scard__icon">🕷️</div>
         <h3 class="scard__title">Уничтожение пауков и мокриц</h3>
         <p class="scard__text">Избавление от пауков, мокриц, чешуйниц и других влажностных вредителей в квартирах, подвалах и цокольных этажах.</p>
-        <div class="scard__footer"><span class="scard__price">от 1 600 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 1 600 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
       </article>
 
       <article class="scard">
         <div class="scard__icon">🍽️</div>
         <h3 class="scard__title">Дезинсекция пищевых объектов</h3>
         <p class="scard__text">Обработка ресторанов, кафе, складов по нормам Роспотребнадзора. Ведение журнала, договор, отчётные документы.</p>
-        <div class="scard__footer"><span class="scard__price">от 4 500 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 4 500 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
       </article>
 
       <article class="scard">
         <div class="scard__icon">🛡️</div>
         <h3 class="scard__title">Барьерная защита</h3>
         <p class="scard__text">Профилактическая обработка, предотвращающая повторное появление насекомых от соседей и из вентиляции.</p>
-        <div class="scard__footer"><span class="scard__price">от 1 200 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+        <div class="scard__footer"><span class="scard__price js-price">от 1 200 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
       </article>
     </div>
   </div>
@@ -308,6 +316,7 @@
       <span class="section__tag">Стоимость</span>
       <h2 class="section__title">Цены на дезинсекцию</h2>
       <p class="section__text">Фиксированные цены без скрытых доплат. Итоговая стоимость зависит от площади и вида вредителя.</p>
+      <p class="geo-note" id="geoPriceNote"></p>
     </div>
 
     <div class="tabs" id="priceTabs">
@@ -580,20 +589,19 @@
     </div>
     <div class="contacts">
       <div class="contacts__list">
-        <div class="citem"><span class="citem__ico">📞</span><div><b>Телефон</b><a href="tel:+74951204567">+7 (495) 120-45-67</a><small>круглосуточно, без выходных</small></div></div>
+        <div class="citem"><span class="citem__ico">📞</span><div><b>Телефон</b><a id="cPhone" href="tel:+74951204567">+7 (495) 120-45-67</a><small>круглосуточно, без выходных</small></div></div>
         <div class="citem"><span class="citem__ico">✉️</span><div><b>Почта</b><a href="mailto:info@dez-komfort.ru">info@dez-komfort.ru</a><small>ответим в течение часа</small></div></div>
-        <div class="citem"><span class="citem__ico">📍</span><div><b>Адрес</b><span>Москва, ул. Промышленная, 12, стр. 3, офис 210</span><small>склад и учебный центр</small></div></div>
-        <div class="citem"><span class="citem__ico">💬</span><div><b>Мессенджеры</b><span>WhatsApp / Telegram: +7 (916) 555-01-92</span><small>пришлите фото — определим вредителя</small></div></div>
-        <div class="socials">
-          <a href="#" aria-label="Telegram">TG</a><a href="#" aria-label="WhatsApp">WA</a><a href="#" aria-label="ВКонтакте">VK</a><a href="#" aria-label="YouTube">YT</a>
+        <div class="citem"><span class="citem__ico">📍</span><div><b>Адрес</b><span id="cAddress">Москва, ул. Промышленная, 12, стр. 3, офис 210</span><small>склад и учебный центр</small></div></div>
+        <div class="citem"><span class="citem__ico">💬</span><div><b>Мессенджеры</b><span id="cMessenger">WhatsApp / Telegram: +7 (916) 555-01-92</span><small>пришлите фото — определим вредителя</small></div></div>
+        <div class="socials" id="messengers">
+          <a href="#" aria-label="Telegram" data-msgr="tg">TG</a><a href="#" aria-label="WhatsApp" data-msgr="wa">WA</a><a href="#" aria-label="ВКонтакте" data-msgr="vk">VK</a><a href="#" aria-label="YouTube" data-msgr="yt">YT</a>
         </div>
       </div>
       <div class="contacts__map">
-        <div class="mapfake">
-          <div class="mapfake__pin">📍</div>
-          <div class="mapfake__label">Дез-Комфорт · Москва, ул. Промышленная, 12с3</div>
-          <div class="mapfake__zone z1"></div><div class="mapfake__zone z2"></div><div class="mapfake__zone z3"></div><div class="mapfake__zone z4"></div>
-        </div>
+        <!-- Живая Яндекс.Карта: при заданном ключе JS API — интерактивная,
+             иначе — статичная карта (бесплатный url-конструктор, без ключа) -->
+        <div id="ymaps" class="ymaps-box" data-lat="55.7091" data-lon="37.7452"
+             data-label="Дез-Комфорт · Москва, ул. Промышленная, 12с3"></div>
         <p class="map-note">Зона выезда: вся Москва + 60 км от МКАД. Выезд за пределы — по тарифу 30 ₽/км.</p>
       </div>
     </div>
@@ -657,9 +665,12 @@
     <form id="modalForm" novalidate>
       <input type="text" name="name" placeholder="Ваше имя" autocomplete="name">
       <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel">
+      <input type="text" name="city" id="modalCity" list="cityOptions" placeholder="Город" autocomplete="address-level2">
       <select name="service">
         <option>Тараканы</option><option>Клопы</option><option>Муравьи</option><option>Блохи</option><option>Комары / клещи</option><option>Другое</option>
       </select>
+      <textarea name="message" rows="2" placeholder="Комментарий (необязательно)" style="width:100%;border:1px solid var(--line,#dfe6e4);border-radius:10px;padding:10px 12px;font:inherit"></textarea>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
       <label class="agree"><input type="checkbox" name="agree" checked><span>Согласен с политикой конфиденциальности</span></label>
       <button type="submit" class="btn btn--primary btn--block">Жду звонка</button>
     </form>
@@ -680,8 +691,12 @@
 <!-- Список городов для автодополнения -->
 <datalist id="cityOptions"></datalist>
 
+<script src="js/config.js"></script>
 <script src="js/cities.js"></script>
 <script src="js/geo.js"></script>
+<script src="js/leads.js"></script>
+<script src="js/map.js"></script>
+<script src="js/analytics.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
