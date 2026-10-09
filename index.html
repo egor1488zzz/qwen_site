@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дез-Комфорт — дезинсекция и уничтожение насекомых в Москве | Гарантия до 12 месяцев</title>
+<meta name="description" content="Профессиональная дезинсекция квартир, домов и коммерческих объектов. Уничтожение тараканов, клопов, муравьёв, блох. Безопасные препараты, гарантия до 12 месяцев, выезд за 60 минут. Звоните: +7 (495) 120-45-67">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+
+<!-- ══════════ TOP BAR ══════════ -->
+<div class="topbar">
+  <div class="container topbar__inner">
+    <div class="topbar__contacts">
+      <span class="topbar__item">📍 Москва и Московская область</span>
+      <span class="topbar__item">🕙 Круглосуточно, без выходных</span>
+    </div>
+    <div class="topbar__right">
+      <a href="mailto:info@dez-komfort.ru" class="topbar__item">✉️ info@dez-komfort.ru</a>
+      <a href="tel:+74951204567" class="topbar__phone">+7 (495) 120-45-67</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ HEADER ══════════ -->
+<header class="header" id="header">
+  <div class="container header__inner">
+    <a href="#" class="logo">
+      <span class="logo__icon">
+        <svg viewBox="0 0 24 24" width="34" height="34" fill="none"><path d="M12 2l8 3v6c0 5.2-3.4 9.4-8 11-4.6-1.6-8-5.8-8-11V5l8-3z" fill="#0C7C63"/><path d="M8.5 12.2l2.3 2.3 4.7-4.7" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="logo__text">Дез<b>-Комфорт</b><small>Служба дезинсекции №1</small></span>
+    </a>
+
+    <nav class="nav" id="nav">
+      <a href="#services">Услуги</a>
+      <a href="#methods">Методы</a>
+      <a href="#prices">Цены</a>
+      <a href="#steps">Как мы работаем</a>
+      <a href="#reviews">Отзывы</a>
+      <a href="#faq">Вопросы</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+
+    <div class="header__actions">
+      <a href="tel:+74951204567" class="header__phone">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-11.1 4.9-20.1-4.1-20.1-15.2 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.2 2.2z"/></svg>
+        +7 (495) 120-45-67
+      </a>
+      <button class="btn btn--primary header__cta" data-modal="callback">Вызвать мастера</button>
+      <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero">
+  <div class="hero__bg"></div>
+  <div class="container hero__inner">
+    <div class="hero__content">
+      <div class="hero__badges">
+        <span class="badge badge--green">✔ Работаем с 2011 года</span>
+        <span class="badge badge--orange">🔥 Скидка 15% при заказе онлайн</span>
+      </div>
+      <h1 class="hero__title">Избавим от насекомых<br><span>за одну обработку</span></h1>
+      <p class="hero__subtitle">Профессиональная дезинсекция квартир, домов и коммерческих объектов безопасными препаратами. Выезд мастера в течение <b>60&nbsp;минут</b>, гарантия на все работы — <b>до 12&nbsp;месяцев</b>.</p>
+      <ul class="hero__ticks">
+        <li>Препараты безопасны для детей и животных</li>
+        <li>Оплата только после принятия работ</li>
+        <li>Договор, чек и акт выполненных работ</li>
+      </ul>
+      <div class="hero__buttons">
+        <button class="btn btn--primary btn--lg" data-modal="callback">Рассчитать стоимость</button>
+        <a href="#prices" class="btn btn--ghost btn--lg">Смотреть цены</a>
+      </div>
+    </div>
+
+    <div class="hero__card">
+      <form class="leadform" id="heroForm" novalidate>
+        <div class="leadform__body">
+        <h3 class="leadform__title">Не знаете точную цену?</h3>
+        <p class="leadform__hint">Оставьте заявку — перезвоним за <b>5 минут</b>, бесплатно проконсультируем и рассчитаем стоимость.</p>
+        <div class="field">
+          <input type="text" name="name" placeholder="Ваше имя" autocomplete="name">
+        </div>
+        <div class="field">
+          <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel">
+        </div>
+        <label class="agree"><input type="checkbox" name="agree" checked><span>Согласен с политикой конфиденциальности</span></label>
+        <button type="submit" class="btn btn--primary btn--block">Получить консультацию</button>
+        <p class="leadform__secure">🔒 Ваши данные защищены и не передаются третьим лицам</p>
+        </div>
+        <div class="leadform__sent">
+          <div class="tick">✅</div>
+          <h4>Заявка принята!</h4>
+          <p>Оператор перезвонит вам в течение 5 минут.<br>Если срочно — звоните: <a href="tel:+74951204567" class="inline-link">+7 (495) 120-45-67</a></p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="hero__stats">
+    <div class="container hero__stats-inner">
+      <div class="stat"><b data-count="14">0</b><span>лет на рынке</span></div>
+      <div class="stat"><b data-count="48000" data-suffix="+">0</b><span>обработок выполнено</span></div>
+      <div class="stat"><b data-count="98" data-suffix="%">0</b><span>положительных отзывов</span></div>
+      <div class="stat"><b data-count="12" data-suffix=" мес">0</b><span>гарантия по договору</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICES ══════════ -->
+<section class="section" id="services">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__tag">Наши услуги</span>
+      <h2 class="section__title">Уничтожаем любых синантропных насекомых</h2>
+      <p class="section__text">Работаем с квартирами, частными домами, ресторанами, офисами и производственными помещениями. Подберём метод под вашу ситуацию.</p>
+    </div>
+
+    <div class="grid grid--4">
+      <article class="scard">
+        <div class="scard__icon">🪳</div>
+        <h3 class="scard__title">Уничтожение тараканов</h3>
+        <p class="scard__text">Полное уничтожение рыжих и чёрных тараканов холодным туманом с гарантией. Обработка вентиляции и мест скопления.</p>
+        <div class="scard__footer"><span class="scard__price">от 1 800 ₽</span><a href="#tarakany" class="scard__link">Подробнее →</a></div>
+      </article>
+
+      <article class="scard">
+        <div class="scard__icon">🛏️</div>
+        <h3 class="scard__title">Уничтожение клопов</h3>
+        <p class="scard__text">Избавление от постельных клопов за 1 визит. Обработка матрасов, каркасов, плинтусов и всех путей миграции паразитов.</p>
+        <div class="scard__footer"><span class="scard__price">от 2 200 ₽</span><a href="#klopy" class="scard__link">Подробнее →</a></div>
+      </article>
+
+      <article class="scard">
+        <div class="scard__icon">🐜</div>
+        <h3 class="scard__title">Уничтожение муравьёв</h3>
+        <p class="scard__text">Уничтожение садовых и домовых муравьёв вместе с матками и колониями. Барьерная защита участка и помещения.</p>
+        <div class="scard__footer"><span class="scard__price">от 1 500 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+      </article>
+
+      <article class="scard">
+        <div class="scard__icon">🐕</div>
+        <h3 class="scard__title">Уничтожение блох</h3>
+        <p class="scard__text">Обработка помещений, подвалов и придомовой территории от блох. Рекомендации по обработке домашних животных.</p>
+        <div class="scard__footer"><span class="scard__price">от 1 700 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+      </article>
+
+      <article class="scard">
+        <div class="scard__icon">🦟</div>
+        <h3 class="scard__title">Уничтожение комаров</h3>
+        <p class="scard__text">Обработка участка от комаров и клещей методом ULV. Защита территории до 6 недель, возможность срочного выезда к празднику.</p>
+        <div class="scard__footer"><span class="scard__price">от 3 000 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+      </article>
+
+      <article class="scard">
+        <div class="scard__icon">🕷️</div>
+        <h3 class="scard__title">Уничтожение пауков и мокриц</h3>
+        <p class="scard__text">Избавление от пауков, мокриц, чешуйниц и других влажностных вредителей в квартирах, подвалах и цокольных этажах.</p>
+        <div class="scard__footer"><span class="scard__price">от 1 600 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+      </article>
+
+      <article class="scard">
+        <div class="scard__icon">🍽️</div>
+        <h3 class="scard__title">Дезинсекция пищевых объектов</h3>
+        <p class="scard__text">Обработка ресторанов, кафе, складов по нормам Роспотребнадзора. Ведение журнала, договор, отчётные документы.</p>
+        <div class="scard__footer"><span class="scard__price">от 4 500 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+      </article>
+
+      <article class="scard">
+        <div class="scard__icon">🛡️</div>
+        <h3 class="scard__title">Барьерная защита</h3>
+        <p class="scard__text">Профилактическая обработка, предотвращающая повторное появление насекомых от соседей и из вентиляции.</p>
+        <div class="scard__footer"><span class="scard__price">от 1 200 ₽</span><a href="#more" class="scard__link">Подробнее →</a></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ WHY US ══════════ -->
+<section class="section section--dark">
+  <div class="container">
+    <div class="section__head section__head--light">
+      <span class="section__tag section__tag--dark">Почему мы</span>
+      <h2 class="section__title">6 причин доверить нам ваш дом</h2>
+    </div>
+    <div class="grid grid--3 whygrid">
+      <div class="why"><div class="why__num">01</div><h3>Гарантия по договору</h3><p>Если насекомые вернутся в гарантийный период — приедем повторно и обработаем бесплатно.</p></div>
+      <div class="why"><div class="why__num">02</div><h3>Безопасно для семьи</h3><p>Используем препараты 4 класса опасности, разрешённые Роспотребнадзором. Возвращаться домой можно через 2–3 часа.</p></div>
+      <div class="why"><div class="why__num">03</div><h3>Выезд за 60 минут</h3><p>Круглосуточная служба и 18 бригад по городу. Дежурный мастер готов выехать прямо сейчас.</p></div>
+      <div class="why"><div class="why__num">04</div><h3>Оплата по факту</h3><p>Рассчитываетесь после осмотра и принятия работ. Никаких предоплат и навязанных услуг.</p></div>
+      <div class="why"><div class="why__num">05</div><h3>Сертифицированные врачи-дезинфекторы</h3><p>Все специалисты с профильным образованием и опытом от 5 лет, регулярно проходят обучение.</p></div>
+      <div class="why"><div class="why__num">06</div><h3>Документы для юрлиц</h3><p>Договор, счета, акты, журнал учёта вредителей — полный пакет для проверок Роспотребнадзора.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ METHODS ══════════ -->
+<section class="section" id="methods">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__tag">Технологии</span>
+      <h2 class="section__title">Методы обработки</h2>
+      <p class="section__text">Выбор метода зависит от вида вредителя, степени заражённости и типа помещения.</p>
+    </div>
+
+    <div class="methods">
+      <div class="method">
+        <div class="method__icon">💨</div>
+        <h3>Холодный туман (ULV)</h3>
+        <p>Распыление рабочего раствора частицами 20–80 мкм. Инсектицид проникает во все скрытые полости, щели и гнезда. Основной метод для квартир и домов.</p>
+        <span class="method__effect">Эффективность: 95–99%</span>
+      </div>
+      <div class="method">
+        <div class="method__icon">🌫️</div>
+        <h3>Горячий туман (ULV-термо)</h3>
+        <p>Раствор нагревается до 50–70 °C, мелкодисперсные частицы дольше держатся в воздухе и глубже проникают в ткани и щели. Применяется при сильной заражённости.</p>
+        <span class="method__effect">Эффективность: до 100%</span>
+      </div>
+      <div class="method">
+        <div class="method__icon">🧪</div>
+        <h3>Барьерная обработка</h3>
+        <p>Нанесение микрокапсулированных препаратов на пути возможного проникновения насекомых: вентиляция, стояки, периметр участка. Защита от «соседей».</p>
+        <span class="method__effect">Защита: до 3 месяцев</span>
+      </div>
+      <div class="method">
+        <div class="method__icon">🎯</div>
+        <h3>Гелевая приманка (инъекционная)</h3>
+        <p>Точечное нанесение гелей с медленным действием: вредитель уносит отраву в гнездо и уничтожает колонию, включая личинок. Для сложных случаев и общепита.</p>
+        <span class="method__effect">Действие: 2–4 недели</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ COCKROACHES BLOCK ══════════ -->
+<section class="section section--alt" id="tarakany">
+  <div class="container split">
+    <div class="split__media">
+      <div class="imagetile imagetile--green">
+        <span class="imagetile__emoji">🪳</span>
+        <span class="imagetile__caption">Тараканы — самая частая жалоба в Москве</span>
+      </div>
+    </div>
+    <div class="split__body">
+      <h2 class="section__title section__title--left">Уничтожение тараканов в квартире</h2>
+      <p>Рыжий таракан размножается молниеносно: одна самка за жизнь даёт до 300 особей потомства. Бытовые средства из магазина лишь временно разгоняют популяцию — через 2–3 недели тараканы возвращаются, потому что выживают яйца и личинки в самых глубоких укрытиях.</p>
+      <ul class="checks">
+        <li>Обрабатываем кухню, ванную, вентиляцию, стояки, за мебелью и техникой</li>
+        <li>Препараты с эффектом пролонгации добивают вылупившихся личинок</li>
+        <li>Рекомендуем согласовать обработку с соседями — это снижает риск повторного заселения</li>
+        <li>Гарантия до 12 месяцев с бесплатным контрольным визитом</li>
+      </ul>
+      <div class="split__cta">
+        <button class="btn btn--primary" data-modal="callback">Заказать обработку</button>
+        <span class="split__note">Перезвоним за 5 минут</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ BEDBUGS BLOCK ══════════ -->
+<section class="section" id="klopy">
+  <div class="container split split--rev">
+    <div class="split__media">
+      <div class="imagetile imagetile--red">
+        <span class="imagetile__emoji">🛏️</span>
+        <span class="imagetile__caption">Постельные клопы кусают каждую ночь</span>
+      </div>
+    </div>
+    <div class="split__body">
+      <h2 class="section__title section__title--left">Уничтожение постельных клопов</h2>
+      <p>Клопы приходят от соседей, с одеждой из общежитий и гостиниц, с подержанной мебелью. Живут в матрасах, каркасах диванов, за обоями и розетками, активны ночью. Укус вызывает аллергию и нарушает сон, а за 2–3 месяца колония захватывает всю комнату.</p>
+      <ul class="checks">
+        <li>Инспекция с тепловизором и поиском очагов, включая мебель</li>
+        <li>Двойная обработка: инсектицид + микрокапсулы длительного действия</li>
+        <li>Обработка от яиц — единственная гарантия, что клопы не возродятся</li>
+        <li>Можно жить в квартире уже через 3 часа после обработки</li>
+      </ul>
+      <div class="split__cta">
+        <button class="btn btn--primary" data-modal="callback">Вызвать дезинфектора</button>
+        <span class="split__note">Скидка 15% при заказе онлайн</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PRICES ══════════ -->
+<section class="section section--alt" id="prices">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__tag">Стоимость</span>
+      <h2 class="section__title">Цены на дезинсекцию</h2>
+      <p class="section__text">Фиксированные цены без скрытых доплат. Итоговая стоимость зависит от площади и вида вредителя.</p>
+    </div>
+
+    <div class="tabs" id="priceTabs">
+      <div class="tabs__nav">
+        <button class="tabs__btn tabs__btn--active" data-tab="flat">Квартиры</button>
+        <button class="tabs__btn" data-tab="house">Частные дома</button>
+        <button class="tabs__btn" data-tab="biz">Коммерческие объекты</button>
+        <button class="tabs__btn" data-tab="area">Участки</button>
+      </div>
+
+      <div class="tabs__panel tabs__panel--active" data-panel="flat">
+        <div class="tablewrap">
+          <table class="pricetable">
+            <thead><tr><th>Площадь</th><th>Тараканы</th><th>Клопы</th><th>Блохи / муравьи</th><th>Комплекс (все виды)</th></tr></thead>
+            <tbody>
+              <tr><td>1 комната</td><td>1 800 ₽</td><td>2 200 ₽</td><td>1 700 ₽</td><td>2 800 ₽</td></tr>
+              <tr><td>1-комн. квартира</td><td>2 000 ₽</td><td>2 500 ₽</td><td>1 900 ₽</td><td>3 200 ₽</td></tr>
+              <tr><td>2-комн. квартира</td><td>2 400 ₽</td><td>2 900 ₽</td><td>2 200 ₽</td><td>3 800 ₽</td></tr>
+              <tr><td>3-комн. квартира</td><td>2 800 ₽</td><td>3 300 ₽</td><td>2 600 ₽</td><td>4 400 ₽</td></tr>
+              <tr><td>4+ комнат</td><td>3 200 ₽</td><td>3 800 ₽</td><td>3 000 ₽</td><td>5 200 ₽</td></tr>
+              <tr><td>МОП зоны (кухня + коридор + с/у)</td><td>1 500 ₽</td><td>—</td><td>1 400 ₽</td><td>2 200 ₽</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">* При обработке всей квартиры цена включает места общего пользования. Гарантия от 6 месяцев.</p>
+      </div>
+
+      <div class="tabs__panel" data-panel="house">
+        <div class="tablewrap">
+          <table class="pricetable">
+            <thead><tr><th>Площадь дома</th><th>Тараканы</th><th>Клопы</th><th>Муравьи / блохи</th><th>Комплекс</th></tr></thead>
+            <tbody>
+              <tr><td>до 100 м²</td><td>4 500 ₽</td><td>5 500 ₽</td><td>4 000 ₽</td><td>7 500 ₽</td></tr>
+              <tr><td>100–200 м²</td><td>6 500 ₽</td><td>7 500 ₽</td><td>5 500 ₽</td><td>10 500 ₽</td></tr>
+              <tr><td>200–300 м²</td><td>8 500 ₽</td><td>9 500 ₽</td><td>7 000 ₽</td><td>13 500 ₽</td></tr>
+              <tr><td>300–500 м²</td><td>11 000 ₽</td><td>12 500 ₽</td><td>9 000 ₽</td><td>17 500 ₽</td></tr>
+              <tr><td>более 500 м²</td><td colspan="4" style="text-align:center">по индивидуальному расчёту — <a href="tel:+74951204567" class="inline-link">уточните по телефону</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">* Включена обработка дома, подвала и чердака. Скидка на обработку хозяйственных построек — 20%.</p>
+      </div>
+
+      <div class="tabs__panel" data-panel="biz">
+        <div class="tablewrap">
+          <table class="pricetable">
+            <thead><tr><th>Объект</th><th>Разовая обработка</th><th>Договорное обслуживание (мес.)</th><th>Гарантия</th></tr></thead>
+            <tbody>
+              <tr><td>Кафе, ресторан (до 100 м²)</td><td>от 5 000 ₽</td><td>от 3 500 ₽</td><td>12 мес.</td></tr>
+              <tr><td>Офис, магазин</td><td>от 3 500 ₽</td><td>от 2 500 ₽</td><td>12 мес.</td></tr>
+              <tr><td>Склад, производство</td><td>от 8 000 ₽</td><td>индивидуально</td><td>12 мес.</td></tr>
+              <tr><td>Пищеблок / столовая школы, детсада</td><td>от 4 500 ₽</td><td>от 3 000 ₽</td><td>12 мес.</td></tr>
+              <tr><td>Подвал / техэтаж МКД</td><td>от 6 000 ₽</td><td>от 4 000 ₽/мес.</td><td>6 мес.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">* Работаем по нормам СанПиН, предоставляем полный пакет документов для проверок Роспотребнадзора.</p>
+      </div>
+
+      <div class="tabs__panel" data-panel="area">
+        <div class="tablewrap">
+          <table class="pricetable">
+            <thead><tr><th>Площадь участка</th><th>Комары</th><th>Клещи</th><th>Комары + клещи</th><th>Муравьи (муравейники)</th></tr></thead>
+            <tbody>
+              <tr><td>до 6 соток</td><td>3 000 ₽</td><td>3 500 ₽</td><td>5 000 ₽</td><td>3 500 ₽</td></tr>
+              <tr><td>6–12 соток</td><td>4 500 ₽</td><td>5 000 ₽</td><td>7 500 ₽</td><td>5 000 ₽</td></tr>
+              <tr><td>12–20 соток</td><td>6 000 ₽</td><td>6 500 ₽</td><td>9 500 ₽</td><td>7 000 ₽</td></tr>
+              <tr><td>более 20 соток</td><td colspan="4" style="text-align:center">по индивидуальному расчёту — <a href="tel:+74951204567" class="inline-link">уточните по телефону</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note">* Защита действует до 6 недель. Возможна срочная обработка к мероприятию в день обращения.</p>
+      </div>
+    </div>
+
+    <div class="calcbox">
+      <div class="calcbox__info">
+        <h3>Калькулятор стоимости онлайн</h3>
+        <p>Приблизительный расчёт за 10 секунд. Точную цену подтвердит менеджер по телефону.</p>
+      </div>
+      <form class="calcbox__form" id="calcForm">
+        <select id="calcService">
+          <option value="1800">Тараканы</option>
+          <option value="2200">Клопы</option>
+          <option value="1500">Муравьи</option>
+          <option value="1700">Блохи</option>
+          <option value="3000">Комары / клещи (участок)</option>
+          <option value="2800">Комплексная обработка</option>
+        </select>
+        <div class="calcbox__range">
+          <label for="calcArea">Площадь: <b id="calcAreaVal">50</b> м²</label>
+          <input type="range" id="calcArea" min="10" max="500" step="10" value="50">
+        </div>
+        <div class="calcbox__result">Итого: <b id="calcResult">2 000 ₽</b> <s id="calcOld"></s></div>
+        <button type="button" class="btn btn--orange" data-modal="callback" id="calcOrder">Заказать со скидкой 15%</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ STEPS ══════════ -->
+<section class="section" id="steps">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__tag">Процесс</span>
+      <h2 class="section__title">Как проходит работа — 5 шагов</h2>
+    </div>
+    <ol class="steps">
+      <li class="step"><span class="step__num">1</span><h3>Заявка</h3><p>Вы оставляете заявку на сайте или звоните. Консультируем бесплатно и называем точную стоимость.</p></li>
+      <li class="step"><span class="step__num">2</span><h3>Выезд мастера</h3><p>Дезинфектор приезжает в удобное время, осматривает помещение и определяет вид вредителя и очаги.</p></li>
+      <li class="step"><span class="step__num">3</span><h3>Обработка</h3><p>Готовим помещение и проводим обработку выбранным методом. В среднем занимает 30–60 минут.</p></li>
+      <li class="step"><span class="step__num">4</span><h3>Акт и гарантия</h3><p>Выдаём договор, счёт и акт выполненных работ с указанием гарантийного срока до 12 месяцев.</p></li>
+      <li class="step"><span class="step__num">5</span><h3>Контрольный визит</h3><p>Через 2–3 недели бесплатный контроль. Если остались насекомые — повторная обработка за наш счёт.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ══════════ PREP ══════════ -->
+<section class="section section--alt" id="more">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__tag">Памятка клиенту</span>
+      <h2 class="section__title">Как подготовиться к обработке</h2>
+      <p class="section__text">Правильная подготовка — залог 100% результата. Мастер продублирует рекомендации при осмотре.</p>
+    </div>
+    <div class="prep">
+      <div class="prep__col prep__col--do">
+        <h3>✅ Что нужно сделать</h3>
+        <ul>
+          <li>Провести влажную уборку, убрать крошки и остатки пищи</li>
+          <li>Скрыть продукты питания и посуду в герметичные пакеты</li>
+          <li>Отодвинуть мебель от стен, обеспечить доступ к плинтусам</li>
+          <li>Вывести детей и домашних животных на время обработки</li>
+          <li>Аккуратно снять постиральное и детское бельё, упаковать</li>
+          <li>Предупредить соседей, если заражение распространяется по стоякам</li>
+        </ul>
+      </div>
+      <div class="prep__col prep__col--dont">
+        <h3>⛔ Чего делать нельзя</h3>
+        <ul>
+          <li>Мыть полы с химией 10–14 дней после обработки (сохраняется защитный слой)</li>
+          <li>Проветривать помещение первые 4 часа</li>
+          <li>Подметать и смывать инсектицид с поверхностей «на скорость»</li>
+          <li>Использовать бытовые аэрозоли одновременно с профессиональной обработкой</li>
+          <li>Оставлять открытыми аквариумы (рыбок лучше увезти)</li>
+        </ul>
+      </div>
+      <div class="prep__col prep__col--faq">
+        <h3>ℹ️ Частые вопросы</h3>
+        <div class="qa-mini">
+          <b>Нужно ли покидать квартиру?</b>
+          <p>Да, на 2–3 часа. После — проветрить 30 минут и вернуться.</p>
+          <b>Безопасно ли для детей?</b>
+          <p>Препараты 4 класса опасности разрешены для детских учреждений.</p>
+          <b>Будет ли запах?</b>
+          <p>Современные средства почти без запаха, выветриваются за пару часов.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ REVIEWS ══════════ -->
+<section class="section" id="reviews">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__tag">Отзывы</span>
+      <h2 class="section__title">Что говорят клиенты</h2>
+      <div class="ratingline">
+        <span class="stars">★★★★★</span>
+        <b>4.9</b> из 5 — средняя оценка по <a href="#" class="inline-link">2 340 отзывам</a> на Яндекс.Картах и Отзовике
+      </div>
+    </div>
+
+    <div class="slider" id="reviewSlider">
+      <div class="slider__track" id="reviewTrack">
+        <div class="review">
+          <div class="review__head"><span class="review__ava">Е</span><div><b>Екатерина М.</b><span>квартира 54 м², Марьино</span></div><span class="stars">★★★★★</span></div>
+          <p>Тараканы пришли от соседей, замучились. Вызвали «Дез-Комфорт» вечером — мастер приехал утром, всё объяснил, обработал за 40 минут. Через неделю ни одного насекомого! Прошло полгода — чисто. Спасибо!</p>
+          <span class="review__date">12 августа 2026</span>
+        </div>
+        <div class="review">
+          <div class="review__head"><span class="review__ava">А</span><div><b>Андрей К.</b><span>частный дом, Одинцово</span></div><span class="stars">★★★★★</span></div>
+          <p>Травили клопов в доме — проблема была жуткая. Обработали горячим туманом дом и подвал, дали гарантию на год с договором. Контрольный визит был бесплатный. Результат отличный, рекомендую.</p>
+          <span class="review__date">3 июля 2026</span>
+        </div>
+        <div class="review">
+          <div class="review__head"><span class="review__ava">О</span><div><b>Ольга В.</b><span>ресторан, Тверская</span></div><span class="stars">★★★★★</span></div>
+          <p>Обслуживаемся по договору второй год. Проверок Роспотребнадзора прошли несколько, вопросов нет. Ребята приезжают ночью, чтобы не мешать работе, ведут журнал. Профессионалы.</p>
+          <span class="review__date">21 сентября 2026</span>
+        </div>
+        <div class="review">
+          <div class="review__head"><span class="review__ava">Д</span><div><b>Дмитрий С.</b><span>участок 12 соток, Дмитров</span></div><span class="stars">★★★★☆</span></div>
+          <p>Заказывали обработку от комаров перед днём рождения дочери. Приехали в тот же день, обработали участок и беседку. На празднике ни одного комара! Действовало примерно месяц, потом повторили уже сами.</p>
+          <span class="review__date">18 июня 2026</span>
+        </div>
+        <div class="review">
+          <div class="review__head"><span class="review__ava">М</span><div><b>Марина Л.</b><span>2-комн. квартира, Балашиха</span></div><span class="stars">★★★★★</span></div>
+          <p>Боялась за кота, но мастер подробно рассказал про безопасность препаратов. Всё сделали аккуратно, кот цел, блохи исчезли. Приятно, что оплата была после того, как я приняла работу.</p>
+          <span class="review__date">7 мая 2026</span>
+        </div>
+      </div>
+      <button class="slider__arrow slider__arrow--prev" id="revPrev" aria-label="Назад">‹</button>
+      <button class="slider__arrow slider__arrow--next" id="revNext" aria-label="Вперёд">›</button>
+      <div class="slider__dots" id="revDots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FAQ ══════════ -->
+<section class="section section--alt" id="faq">
+  <div class="container container--narrow">
+    <div class="section__head">
+      <span class="section__tag">FAQ</span>
+      <h2 class="section__title">Ответы на частые вопросы</h2>
+    </div>
+    <div class="accordion">
+      <details class="acc" open>
+        <summary>Сколько длится обработка квартиры?</summary>
+        <div class="acc__body"><p>Сама обработка занимает 30–60 минут в зависимости от площади и метода. Плюс 15–20 минут на подготовку и инструктаж. Вернуться домой можно через 2–3 часа после проветривания.</p></div>
+      </details>
+      <details class="acc">
+        <summary>Насекомые исчезнут сразу?</summary>
+        <div class="acc__body"><p>Основная часть популяции гибнет в первые сутки. Полностью эффект проявляется через 3–7 дней, когда препарат добивает личинок и насекомых, вышедших из укрытий. Это нормально — именно так работает механизм «вынос яда в гнездо».</p></div>
+      </details>
+      <details class="acc">
+        <summary>Безопасно ли для детей, беременных и животных?</summary>
+        <div class="acc__body"><p>Мы используем сертифицированные препараты 4 класса опасности («малоопасные»), разрешённые Роспотребнадзором для обработки жилых помещений, включая детские учреждения. Условия — временный вывод людей и питомцев на 2–3 часа и последующее проветривание.</p></div>
+      </details>
+      <details class="acc">
+        <summary>Что входит в гарантию?</summary>
+        <div class="acc__body"><p>Гарантия фиксируется в договоре и составляет от 6 до 12 месяцев. Если в этот период насекомые появятся снова, мы бесплатно проведем повторную обработку. Достаточно позвонить и описать ситуацию.</p></div>
+      </details>
+      <details class="acc">
+        <summary>Нужно ли готовить квартиру заранее?</summary>
+        <div class="acc__body"><p>Да, минимальная подготовка повышает эффективность: влажная уборка, хранение продуктов в закрытом виде, доступ к плинтусам и стоякам. Подробную памятку пришлём вместе с подтверждением заявки.</p></div>
+      </details>
+      <details class="acc">
+        <summary>Работаете ли вы с арендаторами и юридическими лицами?</summary>
+        <div class="acc__body"><p>Да. Для юрлиц заключаем договор, предоставляем безналичную оплату с НДС, полный закрывающий пакет документов и журнал учёта вредителей для проверок. Для арендаторов достаточно согласия собственника на обработку.</p></div>
+      </details>
+      <details class="acc">
+        <summary>Как быстро вы приезжаете?</summary>
+        <div class="acc__body"><p>Дежурная бригада выезжает в течение 60 минут после подтверждения заявки, работаем круглосуточно. Также можно выбрать любое удобное время, включая выходные.</p></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA STRIP ══════════ -->
+<section class="ctastrip">
+  <div class="container ctastrip__inner">
+    <div>
+      <h2>Насекомые не уйдут сами — начните с бесплатной консультации</h2>
+      <p>Оператор на линии 24/7. Назовём точную стоимость и ответим на все вопросы за 3 минуты.</p>
+    </div>
+    <div class="ctastrip__actions">
+      <a href="tel:+74951204567" class="btn btn--white btn--lg">📞 +7 (495) 120-45-67</a>
+      <button class="btn btn--orange btn--lg" data-modal="callback">Заказать звонок</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONTACTS ══════════ -->
+<section class="section" id="contacts">
+  <div class="container">
+    <div class="section__head">
+      <span class="section__tag">Контакты</span>
+      <h2 class="section__title">Свяжитесь с нами удобным способом</h2>
+    </div>
+    <div class="contacts">
+      <div class="contacts__list">
+        <div class="citem"><span class="citem__ico">📞</span><div><b>Телефон</b><a href="tel:+74951204567">+7 (495) 120-45-67</a><small>круглосуточно, без выходных</small></div></div>
+        <div class="citem"><span class="citem__ico">✉️</span><div><b>Почта</b><a href="mailto:info@dez-komfort.ru">info@dez-komfort.ru</a><small>ответим в течение часа</small></div></div>
+        <div class="citem"><span class="citem__ico">📍</span><div><b>Адрес</b><span>Москва, ул. Промышленная, 12, стр. 3, офис 210</span><small>склад и учебный центр</small></div></div>
+        <div class="citem"><span class="citem__ico">💬</span><div><b>Мессенджеры</b><span>WhatsApp / Telegram: +7 (916) 555-01-92</span><small>пришлите фото — определим вредителя</small></div></div>
+        <div class="socials">
+          <a href="#" aria-label="Telegram">TG</a><a href="#" aria-label="WhatsApp">WA</a><a href="#" aria-label="ВКонтакте">VK</a><a href="#" aria-label="YouTube">YT</a>
+        </div>
+      </div>
+      <div class="contacts__map">
+        <div class="mapfake">
+          <div class="mapfake__pin">📍</div>
+          <div class="mapfake__label">Дез-Комфорт · Москва, ул. Промышленная, 12с3</div>
+          <div class="mapfake__zone z1"></div><div class="mapfake__zone z2"></div><div class="mapfake__zone z3"></div><div class="mapfake__zone z4"></div>
+        </div>
+        <p class="map-note">Зона выезда: вся Москва + 60 км от МКАД. Выезд за пределы — по тарифу 30 ₽/км.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="footer">
+  <div class="container footer__inner">
+    <div class="footer__col footer__col--brand">
+      <a href="#" class="logo logo--light">
+        <span class="logo__icon"><svg viewBox="0 0 24 24" width="30" height="30" fill="none"><path d="M12 2l8 3v6c0 5.2-3.4 9.4-8 11-4.6-1.6-8-5.8-8-11V5l8-3z" fill="#22c58b"/><path d="M8.5 12.2l2.3 2.3 4.7-4.7" stroke="#0b1f1a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="logo__text">Дез<b>-Комфорт</b></span>
+      </a>
+      <p>Служба профессиональной дезинсекции. Уничтожение насекомых в квартирах, домах и на коммерческих объектах с 2011 года.</p>
+      <p class="footer__legal">ООО «Дез-Комфорт» · ИНН 7712345678 · ОГРН 1117746000000</p>
+    </div>
+    <div class="footer__col">
+      <h4>Услуги</h4>
+      <a href="#tarakany">Уничтожение тараканов</a>
+      <a href="#klopy">Уничтожение клопов</a>
+      <a href="#services">Уничтожение муравьёв</a>
+      <a href="#services">Уничтожение блох</a>
+      <a href="#services">Обработка участков</a>
+      <a href="#services">Дезинсекация для бизнеса</a>
+    </div>
+    <div class="footer__col">
+      <h4>Компания</h4>
+      <a href="#methods">Методы обработки</a>
+      <a href="#prices">Цены</a>
+      <a href="#steps">Как мы работаем</a>
+      <a href="#reviews">Отзывы</a>
+      <a href="#faq">Вопросы и ответы</a>
+      <a href="#contacts">Контакты</a>
+    </div>
+    <div class="footer__col">
+      <h4>Контакты</h4>
+      <a href="tel:+74951204567">+7 (495) 120-45-67</a>
+      <a href="mailto:info@dez-komfort.ru">info@dez-komfort.ru</a>
+      <span>Москва, ул. Промышленная, 12с3</span>
+      <span>Круглосуточно, без выходных</span>
+      <button class="btn btn--outline-light btn--sm" data-modal="callback">Заказать звонок</button>
+    </div>
+  </div>
+  <div class="container footer__bottom">
+    <span>© 2011–2026 Дез-Комфорт. Все права защищены.</span>
+    <div class="footer__links">
+      <a href="#">Политика конфиденциальности</a>
+      <a href="#">Договор оферты</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════ MODAL ══════════ -->
+<div class="modal" id="modalCallback" hidden>
+  <div class="modal__overlay" data-close></div>
+  <div class="modal__box" role="dialog" aria-modal="true">
+    <button class="modal__close" data-close aria-label="Закрыть">×</button>
+    <h3>Заказать обратный звонок</h3>
+    <p>Перезвоним в течение <b>5 минут</b> и бесплатно проконсультируем.</p>
+    <form id="modalForm" novalidate>
+      <input type="text" name="name" placeholder="Ваше имя" autocomplete="name">
+      <input type="tel" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="tel">
+      <select name="service">
+        <option>Тараканы</option><option>Клопы</option><option>Муравьи</option><option>Блохи</option><option>Комары / клещи</option><option>Другое</option>
+      </select>
+      <label class="agree"><input type="checkbox" name="agree" checked><span>Согласен с политикой конфиденциальности</span></label>
+      <button type="submit" class="btn btn--primary btn--block">Жду звонка</button>
+    </form>
+    <div class="modal__success" id="modalSuccess" hidden>
+      <div class="modal__success-ico">✅</div>
+      <h3>Заявка отправлена!</h3>
+      <p>Оператор свяжется с вами в ближайшие минуты.<br>Если срочно — звоните: <a href="tel:+74951204567" class="inline-link">+7 (495) 120-45-67</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- Floating call button -->
+<a href="tel:+74951204567" class="fab" aria-label="Позвонить">
+  <svg viewBox="0 0 24 24" width="26" height="26" fill="#fff"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-11.1 4.9-20.1-4.1-20.1-15.2 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.2 2.2z"/></svg>
+  <span class="fab__pulse"></span>
+</a>
+
+<script src="js/main.js"></script>
+</body>
+</html>
