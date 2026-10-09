@@ -33,7 +33,12 @@
     const burger = document.getElementById('burger');
     const nav = document.getElementById('nav');
     if (!burger || !nav) return;
+    const setNavTop = () => {
+      const h = document.querySelector('.header');
+      document.documentElement.style.setProperty('--navtop', (h ? h.offsetHeight : 64) + 'px');
+    };
     burger.addEventListener('click', () => {
+      setNavTop();
       nav.classList.toggle('is-open');
       burger.classList.toggle('is-open');
     });

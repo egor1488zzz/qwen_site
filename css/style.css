@@ -385,3 +385,8 @@ input[type=range]{width:100%;accent-color:var(--mint);height:6px}
   .footer__inner{grid-template-columns:1fr}
   .slider__arrow{display:none}
 }
+
+@media(max-width:1080px){
+  .header__inner{position:static}
+  .nav.is-open{display:flex;position:fixed;top:var(--navtop,64px);left:0;right:0;bottom:0;z-index:99;padding-top:20px;background:#fff;overflow:auto}
+}
