@@ -17,6 +17,82 @@
     initModal();
     initForms();
     initPhoneMask();
+    initCityPicker();
+  }
+
+  /* ── Выбор города + геолокация (совместно с geo.js / cities.js) ── */
+  function initCityPicker() {
+    const btn = document.getElementById('cityPickBtn');
+    const drop = document.getElementById('cityDrop');
+    const search = document.getElementById('citySearch');
+    const listEl = document.getElementById('cityList');
+    const heroCity = document.getElementById('heroCity');
+    const datalist = document.getElementById('cityOptions');
+    if (!btn || !drop || !listEl) return;
+
+    const cities = window.DEZ_CITIES || [];
+
+    // datalist для поля формы
+    if (datalist) {
+      datalist.innerHTML = cities.map(c => `<option value="${c.name}">`).join('');
+    }
+
+    function renderList(q) {
+      const query = (q || '').toLowerCase().replace(/ё/g, 'е').trim();
+      const items = cities.filter(c => !query || c.name.toLowerCase().replace(/ё/g, 'е').indexOf(query) !== -1);
+      listEl.innerHTML = items.slice(0, 60).map(c =>
+        `<li><button type="button" data-city="${c.name}"${c.name === btn.textContent ? ' class="is-active"' : ''}>${c.name}<small>${c.region}</small></button></li>`
+      ).join('') || '<li class="citypick__empty">Город не найден — позвоните нам, работаем по всей РФ</li>';
+    }
+
+    function applyCity(name, opts) {
+      opts = opts || {};
+      const city = (window.DEZ_FIND_CITY && window.DEZ_FIND_CITY(name)) || null;
+      btn.textContent = city ? city.name : name;
+      // подмена телефонов на местный номер
+      document.querySelectorAll('.js-phone-link').forEach(a => {
+        if (city) {
+          a.href = 'tel:' + city.phone;
+          if (a.classList.contains('topbar__phone') || a.classList.contains('header__phone') || a.classList.contains('inline-link')) {
+            const svg = a.querySelector('svg');
+            a.textContent = city.display;
+            if (svg) a.prepend(svg);
+          }
+        }
+      });
+      if (heroCity && !heroCity.value) heroCity.value = city ? city.name : name;
+      if (window.DEZ_GEO && opts.persist !== false) window.DEZ_GEO.remember(city ? city.name : name);
+      document.dispatchEvent(new CustomEvent('dez:city', { detail: city ? city.name : name }));
+    }
+
+    function openDrop() { drop.hidden = false; btn.setAttribute('aria-expanded', 'true'); search.focus(); renderList(search.value); }
+    function closeDrop() { drop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+
+    btn.addEventListener('click', e => { e.stopPropagation(); drop.hidden ? openDrop() : closeDrop(); });
+    search.addEventListener('input', () => renderList(search.value));
+    search.addEventListener('click', e => e.stopPropagation());
+    drop.addEventListener('click', e => e.stopPropagation());
+    listEl.addEventListener('click', e => {
+      const b = e.target.closest('[data-city]');
+      if (!b) return;
+      applyCity(b.dataset.city);
+      closeDrop();
+    });
+    document.addEventListener('click', closeDrop);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrop(); });
+
+    // Автоопределение города при загрузке
+    if (window.DEZ_GEO) {
+      window.DEZ_GEO.detect().then(cityName => applyCity(cityName, { persist: false }));
+    }
+
+    // Синхронизация поля формы с выбранным городом
+    if (heroCity) {
+      heroCity.addEventListener('change', () => {
+        const c = window.DEZ_FIND_CITY(heroCity.value);
+        if (c) applyCity(c.name);
+      });
+    }
   }
 
   /* ── Sticky header shadow ── */
