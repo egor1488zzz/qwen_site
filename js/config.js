@@ -13,9 +13,9 @@ window.DEZ_CONFIG = {
          отдельного бота только для входящих заявок. */
   leadMode: 'endpoint',                // на сервере заявки идут в api.php; ниже — авто-откат в demo на GitHub Pages
   leadEndpoint: '/api.php',            // URL бэкенда при leadMode='endpoint' (файл лежит в корне сайта)
-  serverApi: '',                       // ⚑ ПОСЛЕ ДЕПЛОЯ ВПИШИТЕ СЮДА адрес сервера, напр. 'https://dez-komfort.ru'
-                                       //   — тогда заявки с GitHub Pages тоже будут уходить на ваш бэкенд (через CORS).
-                                       //   Пусто = на GitHub Pages работает demo/telegram, на домене — endpoint.
+  serverApi: 'http://2.26.10.224',     // ⚑ IP сервера — заявки с GitHub Pages уходят на ваш бэкенд.
+                                       //   Когда подключите домен+HTTPS, замените на 'https://ваш-домен.ru'
+                                       //   (и добавьте новый адрес в белый список CORS в api.php / DEZ_CORS_ALLOW).
 
   telegram: {
     botToken: '',                      // '123456789:AA...токен бота' — заполните, и тогда с GitHub Pages заявки будут падать вам в Telegram (режим telegram включится автоматически)

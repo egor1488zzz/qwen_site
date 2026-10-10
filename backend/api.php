@@ -26,10 +26,12 @@ define('DB_FILE', getenv('DEZ_DB_FILE') ?: (__DIR__ . '/leads.db'));
 
 header('Content-Type: application/json; charset=utf-8');
 
-/* CORS — разрешить фронт с GitHub Pages и домена компании */
+/* CORS — строгий белый список разрешённых источников */
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if ($origin) {
+$corsAllowed = array_filter(explode(',', getenv('DEZ_CORS_ALLOW') ?: 'https://egor1488zzz.github.io,http://2.26.10.224,https://2.26.10.224'));
+if ($origin && in_array($origin, $corsAllowed, true)) {
     header('Access-Control-Allow-Origin: ' . $origin);
+    header('Vary: Origin');
     header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
     header('Access-Control-Allow-Headers: Content-Type');
 }
@@ -54,9 +56,49 @@ function db() {
     return $pdo;
 }
 
+/* ── Простейший rate-limit по IP в SQLite (работает без сессий/Cookie) ── */
+function rl_check(int $limitPerMinute) {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'x';
+    $rlFile = preg_replace('/\.db$/', '', DB_FILE) . '_rate.db';
+    $rl = new PDO('sqlite:' . $rlFile);
+    $rl->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $rl->exec('CREATE TABLE IF NOT EXISTS hits (ip TEXT, ts INTEGER)');
+    $now = time();
+    $rl->prepare('DELETE FROM hits WHERE ts < ?')->execute([$now - 60]);
+    $q = $rl->prepare('SELECT COUNT(*) FROM hits WHERE ip = ?');
+    $q->execute([$ip]);
+    if ((int)$q->fetchColumn() >= $limitPerMinute) {
+        http_response_code(429);
+        echo json_encode(['ok' => false, 'error' => 'too many requests']); exit;
+    }
+    $rl->prepare('INSERT INTO hits (ip, ts) VALUES (?, ?)')->execute([$ip, $now]);
+}
+
+/* ── Админ: страница просмотра заявок (пароль = ADMIN_TOKEN) ───── */
+if ($method === 'GET' && isset($_GET['admin'])) {
+    header('Content-Type: text/html; charset=utf-8');
+    $pass = $_GET['pass'] ?? '';
+    if (!hash_equals(ADMIN_TOKEN, $pass)) {
+        echo '<form method="get"><input type="hidden" name="admin" value="1">'
+           . '<input type="password" name="pass" placeholder="Пароль администратора">'
+           . '<button>Войти</button></form>'; exit;
+    }
+    $rows = db()->query('SELECT * FROM leads ORDER BY id DESC LIMIT 500')->fetchAll(PDO::FETCH_ASSOC);
+    echo '<meta charset="utf-8"><title>Заявки Дез-Комфорт</title>'
+       . '<style>body{font-family:sans-serif}table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:4px 8px;font-size:13px}</style>'
+       . '<h2>Заявки (' . count($rows) . ') · <a href="?token=' . htmlspecialchars(ADMIN_TOKEN) . '&export=csv">Выгрузить CSV</a></h2><table><tr><th>ID</th><th>Дата</th><th>Имя</th><th>Телефон</th><th>Город</th><th>Услуга</th><th>Сообщение</th><th>Источник</th><th>Статус</th></tr>';
+    foreach ($rows as $r) {
+        echo '<tr>';
+        foreach (['id','created','name','phone','city','service','message','source','status'] as $k)
+            echo '<td>' . htmlspecialchars((string)($r[$k] ?? '')) . '</td>';
+        echo '</tr>';
+    }
+    echo '</table>'; exit;
+}
+
 /* ── Выгрузка заявок (GET ?token=...&export=csv) ───────────── */
 if ($method === 'GET') {
-    if (($_GET['token'] ?? '') !== ADMIN_TOKEN) {
+    if (!hash_equals(ADMIN_TOKEN, $_GET['token'] ?? '')) {
         http_response_code(403);
         echo json_encode(['error' => 'forbidden']); exit;
     }
@@ -86,14 +128,13 @@ $service = trim($in['service'] ?? 'Не указана');
 $message = trim($in['message'] ?? '');
 $source  = trim($in['source']  ?? 'site');
 
-if (strlen($phone) !== 11 || mb_strlen($city) > 60 || mb_strlen($message) > 1000) {
+if (strlen($phone) !== 11 || strlen($phone) < 10 || mb_strlen($city) > 60 || mb_strlen($message) > 1000 || mb_strlen($name) > 100 || mb_strlen($service) > 100) {
     http_response_code(422);
     echo json_encode(['ok' => false, 'error' => 'invalid data']); exit;
 }
-/* Анти-спам: honeypot + частота с одного IP */
+/* Анти-спам: honeypot + частота с одного IP (SQLite-счётчик, работает без Cookie) */
 if (!empty($in['website'])) { echo json_encode(['ok' => true]); exit; } // боты — тихо игнор
-session_start();
-ip_check(6); // не более 6 заявок с одного IP в минуту
+rl_check(6); // не более 6 заявок с одного IP в минуту
 
 $stmt = db()->prepare('INSERT INTO leads (created,name,phone,city,service,message,source,ip,ua)
     VALUES (:c,:n,:p,:ci,:s,:m,:so,:ip,:ua)');
@@ -117,18 +158,6 @@ try {
 echo json_encode(['ok' => true, 'id' => $id], JSON_UNESCAPED_UNICODE);
 
 /* ── Служебные функции ─────────────────────────────────────── */
-function ip_check(int $limitPerMinute) {
-    $key = 'lead_ts_' . md5($_SERVER['REMOTE_ADDR'] ?? 'x');
-    $now = time();
-    $ts = json_decode($_SESSION[$key] ?? '[]', true);
-    $ts = array_values(array_filter($ts, function ($t) use ($now) { return $now - $t < 60; }));
-    if (count($ts) >= $limitPerMinute) {
-        http_response_code(429);
-        echo json_encode(['ok' => false, 'error' => 'too many requests']); exit;
-    }
-    $ts[] = $now;
-    $_SESSION[$key] = json_encode($ts);
-}
 
 function tg(string $text) {
     @file_get_contents('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/sendMessage?' . http_build_query([
