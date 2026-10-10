@@ -16,7 +16,7 @@ git reset --hard origin/main   # локальные файлы всегда = с
 cp -f "$DIR/backend/api.php" "$DIR/api.php"
 
 # Права: владелец www-data, каталоги 755, файлы 644, базы заявок writable
-chown -R www-www-data "$DIR"
+chown -R www-data:www-data "$DIR"
 find "$DIR" -type d -exec chmod 755 {} \;
 find "$DIR" -type f -exec chmod 644 {} \;
 chmod 664 "$DIR/leads.db" "$DIR/leads_rate.db" 2>/dev/null || true
