@@ -106,9 +106,9 @@ certbot --nginx -d вашдомен.ru -d www.вашдомен.ru
 - админская страница заявок `/api.php?admin=1` с паролем.
 
 ### 2.8 Полезно включить сразу после настройки
-- Бэкап базы заявок: `crontab -e` → строка
-  `0 3 * * * cp /var/www/dez/backend/leads.db /root/backups/leads_$(date +\%F).db && find /root/backups -mtime +14 -delete`
-  (сначала `mkdir -p /root/backups`)
+- Бэкап базы заявок: `sudo mkdir -p /var/backups/dez && sudo chown root:www-data /var/backups/dez && sudo chmod 770 /var/backups/dez`, затем `crontab -e` → строка
+  `0 3 * * * cp /var/www/dez/backend/leads.db /var/backups/dez/leads_$(date +\%F).db && find /var/backups/dez -mtime +14 -delete`
+  (папка в /var, а не в /root — работает и под обычным пользователем с sudo)
 - Логи атак смотреть: `tail -f /var/log/auth.log`, `fail2ban-client status`.
 
 ---

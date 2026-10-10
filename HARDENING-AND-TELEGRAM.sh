@@ -65,10 +65,12 @@ if ! grep -q 'bad_bot' /etc/nginx/sites-available/dez; then
 fi
 nginx -t && systemctl reload nginx
 
-echo "==> 7. Бэкап базы заявок каждые сутки в 03:00"
-mkdir -p /root/backups
+echo "==> 7. Бэкап базы заявок каждые сутки в 03:00 (папка /var/backups/dez, доступна без root)"
+mkdir -p /var/backups/dez
+chown root:www-data /var/backups/dez
+chmod 770 /var/backups/dez
 crontab -l 2>/dev/null | grep -v 'leads_' | grep -v 'leads.db' > /tmp/cron.new || true
-echo '0 3 * * * cp /var/www/dez/backend/leads.db /root/backups/leads_$(date +\%F).db 2>/dev/null; find /root/backups -mtime +14 -delete' >> /tmp/cron.new
+echo '0 3 * * * cp /var/www/dez/backend/leads.db /var/backups/dez/leads_$(date +\%F).db 2>/dev/null; find /var/backups/dez -mtime +14 -delete' >> /tmp/cron.new
 crontab /tmp/cron.new && rm /tmp/cron.new
 echo "   cron установлен: crontab -l"
 
