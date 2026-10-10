@@ -74,7 +74,9 @@
     var t = cfg.telegram || {};
     if (!t.botToken || !t.chatId) return Promise.resolve({ ok: false, error: 'no telegram config' });
     var text = '🔔 Заявка с сайта\n👤 ' + (lead.name || '—') + '\n📞 ' + lead.phone +
-      '\n📍 ' + (lead.city || '—') + '\n🛠 ' + (lead.service || '—') +
+      '\n📍 ' + (lead.city || '—') +
+      (lead.area ? '\n📐 Площадь: ' + lead.area + ' м²' : '') +
+      '\n🛠 ' + (lead.service || '—') +
       (lead.message ? '\n💬 ' + lead.message : '');
     return fetch('https://api.telegram.org/bot' + t.botToken + '/sendMessage', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },

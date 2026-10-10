@@ -7,6 +7,7 @@
   'use strict';
 
   var STORE_KEY = 'dez_city';
+  var MANUAL_KEY = 'dez_city_manual'; // город выбран вручную — не перекрывать автоопределением
   var DEFAULT_CITY = 'Москва';
 
   function getSaved() {
@@ -14,6 +15,19 @@
   }
   function save(name) {
     try { localStorage.setItem(STORE_KEY, name); } catch (e) {}
+  }
+  /* Сохранить город как выбранный вручную (город больше не меняется автоматически) */
+  function saveManual(name) {
+    save(name);
+    try { localStorage.setItem(MANUAL_KEY, '1'); } catch (e) {}
+  }
+  /* Сохранить город как определённый автоматически (можно перезаписать при следующем заходе) */
+  function saveAuto(name) {
+    save(name);
+    try { localStorage.removeItem(MANUAL_KEY); } catch (e) {}
+  }
+  function isManual() {
+    try { return localStorage.getItem(MANUAL_KEY) === '1'; } catch (e) { return false; }
   }
   function cityFromUrl() {
     try {
@@ -74,25 +88,33 @@
 
   /* Публичное событие: сайт готов принять город */
   window.DEZ_GEO = {
-    /* вернуть определённый город (Promise<string>) */
+    /* вернуть определённый город (Promise<string>)
+       Порядок автоопределения: геолокация браузера (точнее IP) → GeoIP по IP → Москва.
+       Если пользователь выбирал город вручную (dez_city_manual) — автоопределение пропускается. */
     detect: function () {
-      var saved = getSaved();
-      if (saved) return Promise.resolve(saved);
+      // город выбран вручную человеком — не трогаем
+      if (isManual()) {
+        var m = getSaved();
+        if (m) return Promise.resolve(m);
+      }
       var urlCity = cityFromUrl();
-      if (urlCity) { var n1 = normalize(urlCity); if (n1) { save(n1); return Promise.resolve(n1); } }
-      return detectByIp()
+      if (urlCity) { var n1 = normalize(urlCity); if (n1) { saveAuto(n1); return Promise.resolve(n1); } }
+      return detectByBrowserGeo()
         .then(function (raw) {
           var n = normalize(raw);
-          if (n && window.DEZ_FIND_CITY(n)) { save(n); return n; }
-          return detectByBrowserGeo().then(function (raw2) {
+          if (n && window.DEZ_FIND_CITY(n)) { saveAuto(n); return n; }
+          return detectByIp().then(function (raw2) {
             var n2 = normalize(raw2);
-            if (n2 && window.DEZ_FIND_CITY(n2)) { save(n2); return n2; }
+            if (n2 && window.DEZ_FIND_CITY(n2)) { saveAuto(n2); return n2; }
             return DEFAULT_CITY;
           });
         })
         .catch(function () { return DEFAULT_CITY; });
     },
-    remember: save,
+    remember: save,          // сохранить как есть
+    rememberManual: saveManual, // сохранение после ручного выбора пользователем
+    rememberAuto: saveAuto,     // сохранение результата автоопределения
+    isManual: isManual,
     DEFAULT: DEFAULT_CITY
   };
 })();

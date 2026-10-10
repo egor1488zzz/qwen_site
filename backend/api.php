@@ -127,6 +127,7 @@ $city    = trim($in['city']    ?? '');
 $service = trim($in['service'] ?? 'Не указана');
 $message = trim($in['message'] ?? '');
 $source  = trim($in['source']  ?? 'site');
+$area    = preg_replace('/[^\d.]/', '', $in['area'] ?? ''); // площадь обработки, м²
 
 if (strlen($phone) !== 11 || strlen($phone) < 10 || mb_strlen($city) > 60 || mb_strlen($message) > 1000 || mb_strlen($name) > 100 || mb_strlen($service) > 100) {
     http_response_code(422);
@@ -149,7 +150,9 @@ $id = (int)db()->lastInsertId();
 try {
     $tgStatus = 'skipped'; // не настроен
     if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
-        $tgStatus = tg("🔔 Новая заявка #$id\n👤 $name\n📞 +$phone\n📍 $city\n🛠 $service" . ($message ? "\n💬 $message" : ''));
+        $tgStatus = tg("🔔 Новая заявка #$id\n👤 $name\n📞 +$phone\n📍 $city"
+            . ($area !== '' ? "\n📐 Площадь: {$area} м²" : '')
+            . "\n🛠 $service" . ($message ? "\n💬 $message" : ''));
     } elseif (getenv('DEZ_DEBUG') === '1') {
         error_log('[DEZ] Telegram НЕ настроен: BOT=' . (TELEGRAM_BOT_TOKEN ? 'OK' : 'ПУСТО') . ' CHAT=' . (TELEGRAM_CHAT_ID ? 'OK' : 'ПУСТО'));
     }

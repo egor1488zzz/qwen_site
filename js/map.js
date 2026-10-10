@@ -13,11 +13,24 @@
   var box = document.getElementById('ymaps');
   if (!box) return; // на страницах городов карты нет
 
+  /* Головной офис (config.js): показываем, если выбранный город — Красноярск/Сосновоборск */
+  var OFFICE = (cfg.officeLat && cfg.officeLon) ? {
+    name: 'Головной офис', lat: cfg.officeLat, lon: cfg.officeLon, address: cfg.officeAddress || ''
+  } : null;
+  function withOffice(c) {
+    if (OFFICE && c && (c.slug === 'krsk' || c.slug === 'sosnovoborsk')) {
+      return { name: c.name, region: c.region, display: c.display, phone: c.phone,
+               address: OFFICE.address || c.address, lat: OFFICE.lat, lon: OFFICE.lon };
+    }
+    return c;
+  }
+
   var current = null;  // активный город
   var ymap = null;     // экземпляр интерактивной карты
   var placemark = null;
 
-  function fallbackStatic(c) {
+  function fallbackStatic(c0) {
+    var c = withOffice(c0);
     // Статичная/виджет-карта без ключа API: конструктор URL Яндекса
     var lat = c.lat, lon = c.lon;
     var src = 'https://yandex.ru/map-widget/v1/?ll=' + [lon, lat].join('%2C') +
@@ -44,7 +57,8 @@
     return list[0];
   }
 
-  function showInteractive(c) {
+  function showInteractive(c0) {
+    var c = withOffice(c0);
     if (!ymap) {
       ymap = new ymaps.Map('ymaps', { center: [c.lat, c.lon], zoom: 11, controls: ['zoomControl'] });
     }

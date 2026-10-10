@@ -12,6 +12,7 @@
     initReveal();
     initCounters();
     initTabs();
+    initAreaEstimate();
     initCalculator();
     initSlider();
     initModal();
@@ -101,7 +102,11 @@
       const cMsgr = document.getElementById('cMessenger');
       if (cMsgr) cMsgr.innerHTML = '<a href="' + tgHref('Здравствуйте! Заказ дезинсекции, город: ' + (city ? city.name : name)) + '" target="_blank" rel="noopener">Написать в Telegram (DezComfort)</a>';
       if (heroCity && !heroCity.value) heroCity.value = city ? city.name : name;
-      if (window.DEZ_GEO && opts.persist !== false) window.DEZ_GEO.remember(city ? city.name : name);
+      // ручная смена города пользователем закрепляется навсегда (автоопределение больше не перекрывает)
+      if (window.DEZ_GEO) {
+        if (opts.persist === false) window.DEZ_GEO.rememberAuto(city ? city.name : name);
+        else window.DEZ_GEO.rememberManual(city ? city.name : name);
+      }
       document.dispatchEvent(new CustomEvent('dez:city', { detail: city ? city.name : name }));
     }
 
@@ -112,6 +117,8 @@
     search.addEventListener('input', () => renderList(search.value));
     search.addEventListener('click', e => e.stopPropagation());
     drop.addEventListener('click', e => e.stopPropagation());
+    /* Выпадающий список остаётся открытым, пока курсор движется по нему.
+       Закрытие — только кликом вне блока, Escape или выбором города. */
     listEl.addEventListener('click', e => {
       const b = e.target.closest('[data-city]');
       if (!b) return;
@@ -156,6 +163,13 @@
     const wrap = document.getElementById('messengers');
     if (!wrap) return;
     const msgText = 'Здравствуйте! Заказ дезинсекции, город: ' + (localStorage.getItem('dez_city') || 'Москва');
+    // ссылка на офис в Яндекс.Картах (координаты офиса — config.js: officeLat/officeLon)
+    const cfg0 = window.DEZ_CONFIG || {};
+    const mapLink = document.getElementById('mapLink');
+    if (mapLink && cfg0.officeLat && cfg0.officeLon) {
+      mapLink.href = 'https://yandex.ru/maps/?pt=' + cfg0.officeLon + ',' + cfg0.officeLat + '&z=16&l=map';
+      mapLink.target = '_blank'; mapLink.rel = 'noopener';
+    }
     wrap.querySelectorAll('[data-msgr]').forEach(a => {
       const t = a.dataset.msgr;
       if (t === 'tg') a.href = tgHref(msgText);
@@ -179,8 +193,9 @@
       const bottomOf = i => base + (i + 1) * (size + gap) + (fabCall ? 72 - size : 0) + 'px';
       const tsvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M9.04 15.35v4.28c0 .5.23.72.72.3l2.6-2.53 3.34 2.44c.6.33 1.04.16 1.18-.55L21.6 4.6c.22-.95-.34-1.33-1.04-1.1L2.9 9.8c-.92.35-.9.82-.16 1.04l4.6 1.43 10.7-6.74c.5-.3.96-.13.58.18z"/></svg>';
       const msvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M3 20V4l6.2 8L3 20zm4.6 0L13 12.6 15.4 16 12 20H7.6zM15.8 20l4.2-4.2c.7-.7.7-1.8 0-2.5L16 9.6 13.6 13 18 17.4 15.8 20zM21 4v3.4l-2.6-2.6L21 4z"/></svg>';
-      const oldWa = document.getElementById('fabWa');
-      if (oldWa) oldWa.remove();
+      // очистка от старой кнопки WhatsApp, если она осталась в DOM из кэша
+      const oldWaBtn = document.getElementById('fabWa');
+      if (oldWaBtn) oldWaBtn.remove();
       const t = mk('fabTg', tgHref(msgText), 'Написать в Telegram', 'linear-gradient(140deg,#2aabee,#1d7fbf)', tsvg);
       const m = mk('fabMax', maxHref(msgText), 'Написать в MAX', 'linear-gradient(140deg,#6b4cff,#4a2fd6)', msvg);
       m.style.bottom = bottomOf(1); t.style.bottom = bottomOf(0);
@@ -319,6 +334,38 @@
   }
 
   /* ── Cost calculator ── */
+  const RATES = { 'Тараканы': 1800, 'Клопы': 2200, 'Муравьи': 1500, 'Блохи': 1700,
+                  'Комары / клещи': 3000, 'Комары / клещи (участок)': 3000, 'Пауки / мокрицы': 1700,
+                  'Пищевой объект': 2000, 'Комплексная обработка': 2800, 'Другое': 1800 };
+  /* Единый расчёт: базовая цена ~ за 40 м², +18 ₽/м² сверх, −20% при площади ≤25 м², скидка 15%, гео-коэффициент города */
+  function estimatePrice(serviceName, area, cityObj) {
+    const base = RATES[serviceName] || 1800;
+    const a = parseInt(area, 10);
+    if (!a || a < 1) return null;
+    let price = base + Math.max(0, a - 40) * 18;
+    if (a <= 25) price = Math.round(base * 0.8);
+    price = Math.round(price / 50) * 50;
+    const discounted = Math.round(price * 0.85 / 50) * 50;
+    const m = cityObj && cityObj.multiplier ? cityObj.multiplier : 1;
+    const geo = v => Math.round(v * m / 50) * 50;
+    return { full: geo(price), promo: geo(discounted) };
+  }
+  /* Предварительный расчёт прямо в форме заявки (поле «Площадь») */
+  function initAreaEstimate() {
+    const areaEl = document.getElementById('heroArea');
+    const serviceEl = document.querySelector('#heroForm [name=service]');
+    const out = document.getElementById('heroEstimate');
+    if (!areaEl || !out) return;
+    const update = () => {
+      const cityName = localStorage.getItem('dez_city') || '';
+      const p = estimatePrice(serviceEl ? serviceEl.value : '', areaEl.value, window.DEZ_FIND_CITY && window.DEZ_FIND_CITY(cityName));
+      out.textContent = p ? '≈ ' + p.promo.toLocaleString('ru-RU') + ' ₽ (со скидкой)' : '';
+    };
+    areaEl.addEventListener('input', update);
+    if (serviceEl) serviceEl.addEventListener('change', update);
+    document.addEventListener('dez:city', update);
+  }
+
   function initCalculator() {
     const service = document.getElementById('calcService');
     const area = document.getElementById('calcArea');
@@ -469,13 +516,23 @@
   /* ── Forms validation & real submit (через DEZ_LEADS: demo/endpoint/telegram) ── */
   function collectLead(form, source) {
     const g = n => { const el = form.querySelector('[name=' + n + ']'); return el ? el.value.trim() : ''; };
+    const areaVal = g('area');
+    // расчёт стоимости по площади (для форм с полем «Площадь»)
+    let estimateTxt = '';
+    if (areaVal) {
+      const cityName = g('city') || localStorage.getItem('dez_city') || '';
+      const p = estimatePrice(g('service'), areaVal, window.DEZ_FIND_CITY && window.DEZ_FIND_CITY(cityName));
+      if (p) estimateTxt = 'Предварительно: ' + p.promo.toLocaleString('ru-RU') + ' ₽ (полная ' + p.full.toLocaleString('ru-RU') + ' ₽)';
+    }
     return {
       name: g('name') || 'Без имени',
       phone: g('phone'),
       city: g('city') || localStorage.getItem('dez_city') || 'Москва',
+      area: areaVal,
       service: g('service') || (source === 'calc' && document.getElementById('calcService')
         ? document.getElementById('calcService').selectedOptions[0].textContent : '') || 'Консультация',
-      message: [g('message'), source ? 'Форма: ' + source : '',
+      message: [g('message'), areaVal ? 'Площадь: ' + areaVal + ' м²' : '', estimateTxt,
+        source ? 'Форма: ' + source : '',
         source === 'calc' && document.getElementById('calcResult')
           ? 'Калькулятор: ' + document.getElementById('calcResult').textContent + ', площадь '
             + (document.getElementById('calcAreaVal') || {}).textContent + ' м²' : '']
