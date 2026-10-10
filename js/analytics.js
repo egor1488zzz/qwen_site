@@ -60,7 +60,7 @@
       var a = e.target.closest && e.target.closest('a[href^="tel:"], .fab');
       if (a) { goal('phone_click', { href: a.getAttribute('href') || '' }); return; }
 
-      var w = e.target.closest && e.target.closest('a[href*="wa.me"], a[href*="t.me"], a[aria-label="WhatsApp"], a[aria-label="Telegram"]');
+      var w = e.target.closest && e.target.closest('a[href*="t.me"], a[href*="max.ru"], a[aria-label="Telegram"], a[aria-label="MAX"]');
       if (w) { goal('messenger_click', { href: w.getAttribute('href') || '' }); return; }
 
       var calc = e.target.closest && e.target.closest('#calcOrder');

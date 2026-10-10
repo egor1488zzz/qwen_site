@@ -30,9 +30,10 @@ window.DEZ_CONFIG = {
      Без ключа показывается статичная карта (url-конструктор, тоже бесплатный). */
   yandexMapsApiKey: '',
 
-  /* 4. Мессенджеры (номер филиала подставляется автоматически из cities.js). */
-  whatsappNumber: '+79165550192',      // номер по умолчанию (Москва)
-  telegramUsername: 'dez_komfort_bot', // юзернейм Telegram-бота/канала
+  /* 4. Мессенджеры. */
+  telegramUsername: 'SiteDezComfort_bot', // юзернейм Telegram-бота ( DezComfort )
+  maxUsername: '',                        // ⚑ Юзернейм MAX-мессенджера (например, 'dezcomfort').
+                                          //   Пока пусто — кнопка MAX ведёт на общий чат support.max.ru
   vkGroupId: 'dezkomfort',
 
   /* 5. Сквозная аналитика. Вставьте id Яндекс.Метрики и Google Analytics.

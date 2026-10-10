@@ -93,15 +93,13 @@
           }
         }
       });
-      // контакты: телефон/адрес/мессенджеры филиала + WA-кнопка
+      // контакты: телефон/адрес филиала + ссылка на Telegram
       const cTel = document.getElementById('cPhone');
       if (cTel && city) { cTel.href = 'tel:' + city.phone; cTel.textContent = city.display; }
       const cAddr = document.getElementById('cAddress');
       if (cAddr && city) cAddr.textContent = city.address;
       const cMsgr = document.getElementById('cMessenger');
-      if (cMsgr && city) cMsgr.textContent = 'WhatsApp / Telegram: ' + city.messenger.replace(/^(\d)(\d{3})(\d{3})(\d{2})(\d{2})$/, '+$1 ($2) $3-$4-$5');
-      const wa = document.getElementById('fabWa');
-      if (wa) wa.href = waHref(city, 'Здравствуйте! Заказ дезинсекции, город: ' + (city ? city.name : name));
+      if (cMsgr) cMsgr.innerHTML = '<a href="' + tgHref('Здравствуйте! Заказ дезинсекции, город: ' + (city ? city.name : name)) + '" target="_blank" rel="noopener">Написать в Telegram (DezComfort)</a>';
       if (heroCity && !heroCity.value) heroCity.value = city ? city.name : name;
       if (window.DEZ_GEO && opts.persist !== false) window.DEZ_GEO.remember(city ? city.name : name);
       document.dispatchEvent(new CustomEvent('dez:city', { detail: city ? city.name : name }));
@@ -137,20 +135,18 @@
     }
   }
 
-  /* ── Ссылки мессенджеров (WhatsApp/Telegram/VK) из config + город ── */
+  /* ── Ссылки мессенджеров (Telegram/MAX/VK) из config ── */
   function currentCity() {
     const name = localStorage.getItem('dez_city') || 'Москва';
     return (window.DEZ_FIND_CITY && window.DEZ_FIND_CITY(name)) || null;
   }
-  function waHref(city, text) {
-    const c = city || currentCity();
-    const cfg = window.DEZ_CONFIG || {};
-    const num = (c && c.messenger ? c.messenger : cfg.whatsappNumber || '').replace(/\D/g, '');
-    return 'https://wa.me/' + num + '?text=' + encodeURIComponent(text);
-  }
   function tgHref(text) {
     const cfg = window.DEZ_CONFIG || {};
-    return 'https://t.me/' + (cfg.telegramUsername || '') + '?text=' + encodeURIComponent(text);
+    return 'https://t.me/' + (cfg.telegramUsername || 'SiteDezComfort_bot') + '?text=' + encodeURIComponent(text);
+  }
+  function maxHref(text) {
+    const cfg = window.DEZ_CONFIG || {};
+    return 'https://max.ru/' + (cfg.maxUsername || '');  // укажите maxUsername в config.js — и кнопка поведёт в ваш чат MAX
   }
   function vkHref() {
     const cfg = window.DEZ_CONFIG || {};
@@ -163,13 +159,13 @@
     wrap.querySelectorAll('[data-msgr]').forEach(a => {
       const t = a.dataset.msgr;
       if (t === 'tg') a.href = tgHref(msgText);
-      else if (t === 'wa') a.href = waHref(null, msgText);
+      else if (t === 'max') a.href = maxHref(msgText);
       else if (t === 'vk') a.href = vkHref();
       else if (t === 'yt') a.href = 'https://www.youtube.com/@' + ((window.DEZ_CONFIG || {}).vkGroupId || 'dezkomfort');
       a.target = '_blank'; a.rel = 'noopener';
     });
-    // плавающие кнопки WhatsApp / Telegram рядом с FAB-звонком
-    if (!document.getElementById('fabWa')) {
+    // плавающие кнопки Telegram / MAX рядом с FAB-звонком (быстрая панель)
+    if (!document.getElementById('fabMax')) {
       const mk = (id, href, label, bg, svg) => {
         const el = document.createElement('a');
         el.id = id; el.className = 'fab fab--sm'; el.href = href;
@@ -181,12 +177,14 @@
       const fabCall = document.querySelector('.fab');
       const base = 26, size = 48, gap = 10;
       const bottomOf = i => base + (i + 1) * (size + gap) + (fabCall ? 72 - size : 0) + 'px';
-      const wsvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.2 1.2-1.7 1.2-.9 0-2 .1-3.9-1.4-2.2-1.7-3.2-3.9-3.3-4.1-.1-.2-.8-1.1-.8-2.2s.5-1.6.7-1.8c.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .6.4l.8 2c.1.2.1.4 0 .5l-.4.6c-.1.2-.3.3-.1.6.2.3.8 1.3 1.6 2 .9.8 1.6 1 1.9 1.2.2.1.4.1.5-.1l.7-.9c.2-.2.3-.2.6-.1l1.8.9c.3.1.4.2.5.3 0 .1 0 .6-.2 1.2z"/></svg>';
       const tsvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M9.04 15.35v4.28c0 .5.23.72.72.3l2.6-2.53 3.34 2.44c.6.33 1.04.16 1.18-.55L21.6 4.6c.22-.95-.34-1.33-1.04-1.1L2.9 9.8c-.92.35-.9.82-.16 1.04l4.6 1.43 10.7-6.74c.5-.3.96-.13.58.18z"/></svg>';
-      const w = mk('fabWa', waHref(null, msgText), 'Написать в WhatsApp', 'linear-gradient(140deg,#25d366,#12a34b)', wsvg);
+      const msvg = '<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M3 20V4l6.2 8L3 20zm4.6 0L13 12.6 15.4 16 12 20H7.6zM15.8 20l4.2-4.2c.7-.7.7-1.8 0-2.5L16 9.6 13.6 13 18 17.4 15.8 20zM21 4v3.4l-2.6-2.6L21 4z"/></svg>';
+      const oldWa = document.getElementById('fabWa');
+      if (oldWa) oldWa.remove();
       const t = mk('fabTg', tgHref(msgText), 'Написать в Telegram', 'linear-gradient(140deg,#2aabee,#1d7fbf)', tsvg);
-      w.style.bottom = bottomOf(1); t.style.bottom = bottomOf(0);
-      w.style.width = w.style.height = t.style.width = t.style.height = size + 'px';
+      const m = mk('fabMax', maxHref(msgText), 'Написать в MAX', 'linear-gradient(140deg,#6b4cff,#4a2fd6)', msvg);
+      m.style.bottom = bottomOf(1); t.style.bottom = bottomOf(0);
+      m.style.width = m.style.height = t.style.width = t.style.height = size + 'px';
     }
   }
 

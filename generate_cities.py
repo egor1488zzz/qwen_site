@@ -112,7 +112,7 @@ def city_page(c, site_url):
   <div class="section__head"><h2 class="section__title">Офис в {prep}</h2></div>
   <div class="citem"><span class="citem__ico">📍</span><div><b>Адрес</b><span>{office}</span></div></div>
   <div class="citem"><span class="citem__ico">📞</span><div><b>Телефон</b><a href="tel:{c['phone']}">{c['display']}</a><small>круглосуточно</small></div></div>
-  <div class="citem"><span class="citem__ico">💬</span><div><b>WhatsApp / Telegram</b><a href="https://wa.me/{wa_digits}" target="_blank" rel="noopener">{c['messenger']}</a><small>пришлите фото вредителя — определим бесплатно</small></div></div>
+  <div class="citem"><span class="citem__ico">💬</span><div><b>Telegram (DezComfort)</b><a href="https://t.me/SiteDezComfort_bot" target="_blank" rel="noopener">@SiteDezComfort_bot</a><small>пришлите фото вредителя — определим бесплатно</small></div></div>
 </div></section>
 
 <footer class="footer"><div class="container footer__bottom">
