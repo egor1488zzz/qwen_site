@@ -147,22 +147,42 @@ $id = (int)db()->lastInsertId();
 
 /* ── Уведомления (не блокируем ответ при ошибках сети) ─────── */
 try {
+    $tgStatus = 'skipped'; // не настроен
     if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
-        tg("🔔 Новая заявка #$id\n👤 $name\n📞 +$phone\n📍 $city\n🛠 $service" . ($message ? "\n💬 $message" : ''));
+        $tgStatus = tg("🔔 Новая заявка #$id\n👤 $name\n📞 +$phone\n📍 $city\n🛠 $service" . ($message ? "\n💬 $message" : ''));
+    } elseif (getenv('DEZ_DEBUG') === '1') {
+        error_log('[DEZ] Telegram НЕ настроен: BOT=' . (TELEGRAM_BOT_TOKEN ? 'OK' : 'ПУСТО') . ' CHAT=' . (TELEGRAM_CHAT_ID ? 'OK' : 'ПУСТО'));
     }
     if (CRM_WEBHOOK) {
         crm($id, $name, $phone, $city, $service, $message);
     }
 } catch (Throwable $e) { error_log('dez notify: ' . $e->getMessage()); }
 
-echo json_encode(['ok' => true, 'id' => $id], JSON_UNESCAPED_UNICODE);
+echo json_encode(array_merge(['ok' => true, 'id' => $id], getenv('DEZ_DEBUG') === '1' ? ['telegram' => $tgStatus ?? 'n/a'] : []), JSON_UNESCAPED_UNICODE);
 
 /* ── Служебные функции ─────────────────────────────────────── */
 
-function tg(string $text) {
-    @file_get_contents('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/sendMessage?' . http_build_query([
-        'chat_id' => TELEGRAM_CHAT_ID, 'text' => $text, 'disable_web_page_preview' => 'true',
-    ]));
+// Отправка в Telegram через cURL. Возвращает 'sent' | текст ошибки.
+function tg(string $text): string {
+    $ch = curl_init('https://api.telegram.org/bot' . TELEGRAM_BOT_TOKEN . '/sendMessage');
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => http_build_query([
+            'chat_id' => TELEGRAM_CHAT_ID, 'text' => $text, 'disable_web_page_preview' => 'true',
+        ]),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_CONNECTTIMEOUT => 3,
+    ]);
+    $resp = curl_exec($ch);
+    $err  = curl_error($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+    curl_close($ch);
+    if ($resp === false) { error_log('[DEZ TG] cURL error: ' . $err); return 'curl_error: ' . $err; }
+    $json = json_decode($resp, true);
+    if (!empty($json['ok'])) return 'sent';
+    error_log('[DEZ TG] HTTP ' . $code . ' ответ: ' . substr($resp, 0, 300));
+    return 'tg_error HTTP ' . $code . ': ' . ($json['description'] ?? substr($resp, 0, 120));
 }
 
 /* Универсальный CRM-webhook: amoCRM _webhooks или Битрикс24 incoming REST */
