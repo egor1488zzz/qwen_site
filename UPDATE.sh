@@ -30,7 +30,7 @@ else
   echo "ВНИМАНИЕ: php*-fpm не найден"
 fi
 
-systemctl reload nginx && echo "nginx перезапущен"
+if nginx -t; then systemctl reload nginx && echo "nginx перезапущен"; else echo "!! nginx -t: ошибка конфигурации, reload пропущен (чините /etc/nginx)"; fi
 
 echo "OK. Проверка:"
 curl -s -X POST http://localhost/api.php -H 'Content-Type: application/json' \
