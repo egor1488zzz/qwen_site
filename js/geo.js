@@ -70,46 +70,102 @@
       .then(function (d) { return d && (d.city || d.locality) ? d.city || d.locality : null; });
   }
 
-  function detectByBrowserGeo() {
+  /* Кэш результата геолокации браузера (запрашиваем только при явном согласии пользователя) */
+  var BROWSE_GEO_KEY = 'dez_geo_cache';
+
+  function geoCacheGet() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(BROWSE_GEO_KEY) || 'null');
+      if (raw && raw.city && Date.now() - raw.ts < 24 * 3600 * 1000) return raw.city;
+    } catch (e) {}
+    return null;
+  }
+  function geoCacheSet(city) {
+    try { localStorage.setItem(BROWSE_GEO_KEY, JSON.stringify({ city: city, ts: Date.now() })); } catch (e) {}
+  }
+
+  function reverseGeocode(lat, lon) {
+    var la = Number(lat).toFixed(4), lo = Number(lon).toFixed(4);
+    return fetchJson('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + la + '&longitude=' + lo + '&localityLanguage=ru', 3500)
+      .then(function (d) { return (d && (d.city || d.locality)) || null; })
+      .catch(function () { return null; });
+  }
+
+  /* Разрешение на геолокацию: запрашиваем ТОЛЬКО если пользователь уже дал согласие
+     (сохранено в localStorage после разрешённого запроса). Иначе — сразу GeoIP по IP,
+     чтобы браузер не показывал окно разрешения и автоопределение не «скачело» городами. */
+  function detectByBrowserGeo(usePrompt) {
     return new Promise(function (resolve) {
       if (!navigator.geolocation) return resolve(null);
+      // если уже спрашивали ранее — не переспрашиваем каждый раз
+      if (!usePrompt && localStorage.getItem('dez_geo_allowed') !== '1') return resolve(null);
       navigator.geolocation.getCurrentPosition(
         function (pos) {
-          var la = pos.coords.latitude.toFixed(4), lo = pos.coords.longitude.toFixed(4);
-          fetchJson('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=' + la + '&longitude=' + lo + '&localityLanguage=ru', 3500)
-            .then(function (d) { resolve(d && (d.city || d.locality) || null); })
-            .catch(function () { resolve(null); });
+          try { localStorage.setItem('dez_geo_allowed', '1'); } catch (e) {}
+          reverseGeocode(pos.coords.latitude, pos.coords.longitude).then(resolve);
         },
         function () { resolve(null); },
-        { timeout: 4000, maximumAge: 600000 }
+        { timeout: 5000, maximumAge: 600000, enableHighAccuracy: false }
       );
     });
   }
 
   /* Публичное событие: сайт готов принять город */
   window.DEZ_GEO = {
-    /* вернуть определённый город (Promise<string>)
-       Порядок автоопределения: геолокация браузера (точнее IP) → GeoIP по IP → Москва.
-       Если пользователь выбирал город вручную (dez_city_manual) — автоопределение пропускается. */
+    /* вернуть определённый город (Promise<string>) — ОДИН финальный результат, без «скачка»:
+       1) ручной выбор пользователя (dez_city_manual) — не трогаем;
+       2) кэш геолокации браузера (< 24 ч);
+       3) ?city= из URL;
+       4) геолокация браузера (только если разрешение уже дано ранее);
+       5) GeoIP по IP;
+       6) Москва.
+       applyCity вызывается ровно один раз — город на экране не меняется после загрузки. */
     detect: function () {
       // город выбран вручную человеком — не трогаем
       if (isManual()) {
         var m = getSaved();
         if (m) return Promise.resolve(m);
       }
+      // сохранённый авто-город с прошлого захода — показываем сразу (без скачка Москва→город)
+      var savedAuto = getSaved();
       var urlCity = cityFromUrl();
       if (urlCity) { var n1 = normalize(urlCity); if (n1) { saveAuto(n1); return Promise.resolve(n1); } }
-      return detectByBrowserGeo()
-        .then(function (raw) {
-          var n = normalize(raw);
-          if (n && window.DEZ_FIND_CITY(n)) { saveAuto(n); return n; }
-          return detectByIp().then(function (raw2) {
-            var n2 = normalize(raw2);
-            if (n2 && window.DEZ_FIND_CITY(n2)) { saveAuto(n2); return n2; }
-            return DEFAULT_CITY;
-          });
-        })
-        .catch(function () { return DEFAULT_CITY; });
+
+      var cachedGeo = geoCacheGet();
+      if (cachedGeo) {
+        var nc = normalize(cachedGeo);
+        if (nc && window.DEZ_FIND_CITY(nc)) { saveAuto(nc); return Promise.resolve(nc); }
+      }
+
+      var base = savedAuto || DEFAULT_CITY; // мгновенный показ, пока идёт сетевой запрос
+      var p = detectByBrowserGeo(false).then(function (raw) {
+        var n = normalize(raw);
+        if (n && window.DEZ_FIND_CITY(n)) { geoCacheSet(n); return n; }
+        return detectByIp().then(function (raw2) {
+          var n2 = normalize(raw2);
+          if (n2 && window.DEZ_FIND_CITY(n2)) return n2;
+          return null;
+        });
+      }).catch(function () { return null; });
+
+      // финализируем ТОЛЬКО если город ещё не был выбран вручную во время запроса
+      return new Promise(function (resolve) {
+        p.then(function (detected) {
+          if (isManual()) { resolve(getSaved() || detected || base); return; }
+          var fin = detected || base;
+          saveAuto(fin);
+          resolve(fin);
+        });
+      });
+    },
+    /* принудительный запрос геолокации браузера с окном разрешения (по кнопке) */
+    askGeolocation: function () {
+      try { localStorage.removeItem('dez_geo_pending'); } catch (e) {}
+      return detectByBrowserGeo(true).then(function (raw) {
+        var n = normalize(raw);
+        if (n && window.DEZ_FIND_CITY(n)) { geoCacheSet(n); saveAuto(n); return n; }
+        return null;
+      });
     },
     remember: save,          // сохранить как есть
     rememberManual: saveManual, // сохранение после ручного выбора пользователем

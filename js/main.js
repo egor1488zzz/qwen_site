@@ -111,26 +111,44 @@
     }
 
     function openDrop() { drop.hidden = false; btn.setAttribute('aria-expanded', 'true'); search.focus(); renderList(search.value); }
-    function closeDrop() { drop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    function closeDrop() { if (!drop.hidden) { drop.hidden = true; btn.setAttribute('aria-expanded', 'false'); } }
 
     btn.addEventListener('click', e => { e.stopPropagation(); drop.hidden ? openDrop() : closeDrop(); });
     search.addEventListener('input', () => renderList(search.value));
     search.addEventListener('click', e => e.stopPropagation());
-    drop.addEventListener('click', e => e.stopPropagation());
-    /* Выпадающий список остаётся открытым, пока курсор движется по нему.
-       Закрытие — только кликом вне блока, Escape или выбором города. */
-    listEl.addEventListener('click', e => {
+    /* Блокируем ВСПЛЫТИЕ кликов внутри dropdown — город выбирается, список не мигает.
+       Обработчик выбора вешаем на сам drop (а не на listEl) — срабатывает надёжно
+       даже если клик пришёлся по <small> или padding кнопки. */
+    drop.addEventListener('click', e => {
+      e.stopPropagation();
       const b = e.target.closest('[data-city]');
       if (!b) return;
       applyCity(b.dataset.city);
       closeDrop();
     });
-    document.addEventListener('click', closeDrop);
+    /* Закрытие — только кликом ВНЕ блока города (движение мыши список НЕ закрывает). */
+    document.addEventListener('click', e => {
+      if (drop.hidden) return;
+      if (!drop.contains(e.target) && !btn.contains(e.target)) closeDrop();
+    }, true);
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrop(); });
 
-    // Автоопределение города при загрузке
+    // Автоопределение города при загрузке: сначала мгновенно показываем сохранённый/дефолтный,
+    // затем — ОДИН финальный результат от detect() (без скачка Сосновоборск→Москва).
     if (window.DEZ_GEO) {
-      window.DEZ_GEO.detect().then(cityName => applyCity(cityName, { persist: false }));
+      const instant = window.DEZ_GEO.isManual() ? (localStorage.getItem('dez_city') || null) : null;
+      if (instant) applyCity(instant, { persist: false });
+      else {
+        const saved = localStorage.getItem('dez_city');
+        if (saved) applyCity(saved, { persist: false }); // показ сразу, пока идёт определение
+      }
+      let userPicked = false;
+      listEl.addEventListener('click', () => { userPicked = true; });
+      heroCity && heroCity.addEventListener('change', () => { userPicked = true; });
+      window.DEZ_GEO.detect().then(cityName => {
+        if (userPicked) return; // пользователь уже выбрал город вручную — не перекрываем
+        applyCity(cityName, { persist: false });
+      });
     }
 
     // Синхронизация поля формы с выбранным городом
