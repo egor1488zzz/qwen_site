@@ -28,7 +28,23 @@ git clone https://github.com/egor1488zzz/qwen_site.git /var/www/dez
 cp /var/www/dez/backend/api.php /var/www/dez/api.php
 ```
 
-## Шаг 4. Настройка api.php (открыть nano /var/www/dez/api.php, блок «НАСТРОЙТЕ ЭТИ ЗНАЧЕНИЯ»)
+## Шаг 4. Настройка api.php — ✅ УЖЕ СДЕЛАНА ЗА ВАС в репозитории
+
+В файле `backend/api.php` уже проставлен рабочий ADMIN_TOKEN (секретная строка) и все
+константы читаются из переменных окружения с приоритетом: env → значение в файле.
+**Ничего редактировать в nano не нужно.** Достаточно задать Telegram-переменные (Шаг 4.1):
+
+```bash
+# на сервере, один раз:
+cat >> /etc/php/8.1/fpm/pool.d/www.conf <<'EOF'
+env[DEZ_TG_BOT_TOKEN]=123456789:AA...ваш_токен
+env[DEZ_TG_CHAT_ID]=-1001234567890
+EOF
+systemctl restart php8.1-fpm
+```
+(или просто впишите значения вместо '' в блоке НАСТРОЙКИ файла backend/api.php перед `cp`)
+
+Старый вариант ручной правки (если хотите через nano):
 ```php
 define('ADMIN_TOKEN', 'придумайте-длинную-секретную-строку'); // для выгрузки CSV
 define('TELEGRAM_BOT_TOKEN', '123456789:AA...');              // см. Шаг 4.1
@@ -105,16 +121,22 @@ curl -I http://ВАШ_IP/            # HTTP/1.1 200 OK
    ```
 3. Автопродление работает само; проверка: `certbot renew --dry-run`.
 
-## Шаг 9. Переключение сайта на живой приём заявок
-Отредактируйте на сервере `nano /var/www/dez/js/config.js`:
-```js
-leadMode: 'endpoint',
-leadEndpoint: '/api.php',
-siteUrl: 'https://dez-komfort.ru'     // новый домен для canonical/og
-```
-(или правьте в GitHub и делайте `cd /var/www/dez && git pull`)
+## Шаг 9. Переключение сайта на живой приём заявок — ✅ почти не нужен
 
-⚠ Если правили напрямую на сервере — не делайте `git pull` без `git stash`, иначе локальные изменения конфликтуют. Правильно: коммитьте config.js в репозиторий после переключения.
+leadMode='endpoint' и leadEndpoint='/api.php' уже стоят в config.js в репозитории —
+на вашем домене заявки работают сразу после деплоя, менять ничего не нужно.
+
+Одна опция по желанию: если хотите, чтобы заявки с GitHub Pages (egor1488zzz.github.io)
+тоже падали на серверный api.php, отредактируйте в GitHub файл js/config.js (иконка карандаша):
+```js
+serverApi: 'https://dez-komfort.ru',   // адрес вашего сервера
+siteUrl: 'https://dez-komfort.ru'      // новый домен для canonical/og
+```
+Затем на сервере: `cd /var/www/dez && git pull`.
+Сайт сам проверит доступность бэкенда; если его нет — автоматически переключится
+на Telegram (при заполненном botToken) или demo, форма ни у кого не сломается.
+
+⚠ Если правили файлы напрямую на сервере — не делайте `git pull` без `git stash`, иначе локальные изменения конфликтуют. Правильно: коммитьте через GitHub и тяните pull.
 
 ## Шаг 10. Финальная проверка
 ```bash
@@ -125,7 +147,7 @@ curl -X POST https://dez-komfort.ru/api.php \
 # ожидаем {"ok":true,...} и сообщение в Telegram-группе
 
 # выгрузка заявок CSV в браузере:
-https://dez-komfort.ru/api.php?token=ВАШ_ADMIN_TOKEN&export=csv
+https://dez-komfort.ru/api.php?token=3e3c7b9025185287c677aa07e82259c5fb33190fb168eced&export=csv
 ```
 Затем откройте сайт, отправьте форму заявки — должно прийти уведомление в Telegram, запись появиться в leads.db.
 

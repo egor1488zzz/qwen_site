@@ -14,12 +14,14 @@
  *  - GET ?token=SECRET&export=csv — выгрузка всех заявок CSV
  */
 
-// ══ НАСТРОЙТЕ ЭТИ ЗНАЧЕНИЯ ════════════════════════════════════
-define('ADMIN_TOKEN', 'change-me-strong-token');       // токен для просмотра/выгрузки
-define('TELEGRAM_BOT_TOKEN', '');                       // '123:AA...' — пусто = не слать
-define('TELEGRAM_CHAT_ID', '');                         // '-100...'
-define('CRM_WEBHOOK', '');                              // URL вебхука amoCRM/Битрикс24, '' = выкл
-define('DB_FILE', __DIR__ . '/leads.db');
+// ══ НАСТРОЙКИ ══════════════════════════════════════════════════
+// Всё можно задавать через переменные окружения (nginx fastcgi_param / pm2 env),
+// либо вписать значения прямо сюда. Значение по умолчанию ниже — рабочий секрет.
+define('ADMIN_TOKEN', getenv('DEZ_ADMIN_TOKEN') ?: '3e3c7b9025185287c677aa07e82259c5fb33190fb168eced'); // токен для просмотра/выгрузки CSV
+define('TELEGRAM_BOT_TOKEN', getenv('DEZ_TG_BOT_TOKEN') ?: '');  // '123:AA...' — пусто = не слать в Telegram
+define('TELEGRAM_CHAT_ID', getenv('DEZ_TG_CHAT_ID') ?: '');      // '-100...' (id чата/группы)
+define('CRM_WEBHOOK', getenv('DEZ_CRM_WEBHOOK') ?: '');          // URL вебхука amoCRM/Битрикс24, '' = выкл
+define('DB_FILE', getenv('DEZ_DB_FILE') ?: (__DIR__ . '/leads.db'));
 // ═══════════════════════════════════════════════════════════════
 
 header('Content-Type: application/json; charset=utf-8');

@@ -11,11 +11,14 @@ window.DEZ_CONFIG = {
      'telegram'— прямая отправка в Telegram через Bot API (без сервера!)
        ⚠ Для telegram-варианта публичный токен виден в коде — используйте
          отдельного бота только для входящих заявок. */
-  leadMode: 'demo',                    // 'demo' | 'endpoint' | 'telegram'
+  leadMode: 'endpoint',                // на сервере заявки идут в api.php; ниже — авто-откат в demo на GitHub Pages
   leadEndpoint: '/api.php',            // URL бэкенда при leadMode='endpoint' (файл лежит в корне сайта)
+  serverApi: '',                       // ⚑ ПОСЛЕ ДЕПЛОЯ ВПИШИТЕ СЮДА адрес сервера, напр. 'https://dez-komfort.ru'
+                                       //   — тогда заявки с GitHub Pages тоже будут уходить на ваш бэкенд (через CORS).
+                                       //   Пусто = на GitHub Pages работает demo/telegram, на домене — endpoint.
 
   telegram: {
-    botToken: '',                      // '123456789:AA...токен бота'
+    botToken: '',                      // '123456789:AA...токен бота' — заполните, и тогда с GitHub Pages заявки будут падать вам в Telegram (режим telegram включится автоматически)
     chatId: ''                         // '-1001234567890' (id вашего чата/канала)
   },
 

@@ -10,6 +10,49 @@
   var KEY = 'dez_leads';
   var cfg = window.DEZ_CONFIG || {};
 
+  /* Авто-режим: на статическом хостинге (GitHub Pages) PHP недоступен,
+     поэтому при leadMode='endpoint' ищем реальный бэкенд:
+       - ?api=https://... в URL;
+       - window.DEZ_API_URL или config.serverApi — прод-адрес сервера.
+     Если endpoint недоступен, а telegram настроен — шлём заявки прямо в Telegram.
+     Иначе — demo. На собственном домене (не github.io) endpoint работает сразу. */
+  var autoResolved = null;
+  function resolveEndpoint() {
+    if (cfg.serverApi) return cfg.serverApi.replace(/\/?$/, '/api.php');
+    if (window.DEZ_API_URL) return String(window.DEZ_API_URL).replace(/\/?$/, '/api.php');
+    try {
+      var q = new URLSearchParams(location.search).get('api');
+      if (q) return q;
+    } catch (e) {}
+    return null;
+  }
+  function tgReady() { var t = cfg.telegram || {}; return !!(t.botToken && t.chatId); }
+
+  function detectBackend(url) {
+    return fetch(url, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"ping":1}'
+    }).then(function (r) { return r.status < 500; }).catch(function () { return false; });
+  }
+
+  function resolveMode() {
+    if (autoResolved) return Promise.resolve(autoResolved);
+    if (location.hostname === 'localhost' || location.hostname === '' || /\.ipaddr\.pages\.dev$/.test(location.hostname)) {
+      autoResolved = 'demo'; return Promise.resolve('demo');
+    }
+    if (!/github\.io$/.test(location.hostname)) { autoResolved = cfg.leadMode || 'demo'; return Promise.resolve(autoResolved); }
+    /* GitHub Pages: пробуем найти живой api.php */
+    var url = resolveEndpoint();
+    if (url) {
+      return detectBackend(url).then(function (ok) {
+        if (ok) { cfg.leadEndpoint = url; autoResolved = 'endpoint'; return 'endpoint'; }
+        autoResolved = tgReady() ? 'telegram' : 'demo';
+        return autoResolved;
+      });
+    }
+    autoResolved = tgReady() ? 'telegram' : 'demo';
+    return Promise.resolve(autoResolved);
+  }
+
   function store(lead) {
     try {
       var arr = JSON.parse(localStorage.getItem(KEY) || '[]');
@@ -66,19 +109,22 @@
     /* submit(lead) -> Promise<{ok, id?, error?}>; lead: {name,phone,city,service,message,source} */
     submit: function (lead) {
       lead.sentAt = Date.now();
-      var mode = cfg.leadMode || 'demo';
-      var p;
-      if (mode === 'endpoint') p = toEndpoint(lead);
-      else if (mode === 'telegram') p = toTelegram(lead);
-      else p = Promise.resolve({ ok: true, id: 0 });
-      toCrm(lead); // параллельно в CRM, не блокируем
-      return p.then(function (res) {
-        if (res && res.ok) { var id = store(lead); res.id = res.id || id; }
-        return res;
+      return resolveMode().then(function (mode) {
+        var p;
+        if (mode === 'endpoint') p = toEndpoint(lead);
+        else if (mode === 'telegram') p = toTelegram(lead);
+        else p = Promise.resolve({ ok: true, id: 0 });
+        toCrm(lead); // параллельно в CRM, не блокируем
+        return p.then(function (res) {
+          if (!res || !res.ok) { store(lead); } /* при сбое — хотя бы локально */
+          else { var id = store(lead); res.id = res.id || id; }
+          return res;
+        });
       });
     },
     all: allLeads,
     clear: function () { try { localStorage.removeItem(KEY); } catch (e) {} },
-    mode: function () { return cfg.leadMode || 'demo'; }
+    mode: function () { return autoResolved || cfg.leadMode || 'demo'; },
+    detect: resolveMode
   };
 })();
