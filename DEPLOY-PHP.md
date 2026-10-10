@@ -16,11 +16,11 @@ apt install -y curl git unzip ufw
 
 ## Шаг 2. Установка nginx + PHP-FPM + SQLite
 ```bash
-apt install -y nginx php8.1-fpm php8.1-sqlite3 php8.1-mbstring php8.1-curl
-systemctl enable --now php8.1-fpm nginx
+apt install -y nginx php8.3-fpm php8.3-sqlite3 php8.3-mbstring php8.3-curl
+systemctl enable --now php8.3-fpm nginx
 php -m | grep -E 'sqlite|mbstring|curl'   # должны быть все три модуля
 ```
-(если PHP 8.1 недоступен в вашем репозитории — `add-apt-repository ppa:ondrej/php`, либо поставьте php8.2 и дальше везде меняйте 8.1 → 8.2)
+(В Ubuntu 24.04 PHP 8.3 доступен из коробки — ничего добавлять не нужно. Если у вас другая версия — посмотрите `php -v` и подставьте её номер везде.)
 
 ## Шаг 3. Клонирование сайта
 ```bash
@@ -36,11 +36,11 @@ cp /var/www/dez/backend/api.php /var/www/dez/api.php
 
 ```bash
 # на сервере, один раз:
-cat >> /etc/php/8.1/fpm/pool.d/www.conf <<'EOF'
+cat >> /etc/php/8.3/fpm/pool.d/www.conf <<'EOF'
 env[DEZ_TG_BOT_TOKEN]=123456789:AA...ваш_токен
 env[DEZ_TG_CHAT_ID]=-1001234567890
 EOF
-systemctl restart php8.1-fpm
+systemctl restart php8.3-fpm
 ```
 (или просто впишите значения вместо '' в блоке НАСТРОЙКИ файла backend/api.php перед `cp`)
 
@@ -74,8 +74,8 @@ chmod 775 /var/www/dez        # чтобы PHP создал leads.db в корн
 
 ### 6.1 Узнаём точную версию PHP (важно: путь sock должен совпадать!)
 ```bash
-php -v                       # например "PHP 8.1.2-1ubuntu2" → версия 8.1
-ls /run/php/                 # должен показать php8.1-fpm.sock — запомните имя файла
+php -v                       # например "PHP 8.3.2-1ubuntu2" → версия 8.3
+ls /run/php/                 # должен показать php8.3-fpm.sock — запомните имя файла
 ```
 Если там, скажем, `php8.2-fpm.sock` — везде ниже в конфиге используйте 8.2.
 
@@ -105,7 +105,7 @@ server {
     # PHP-бэкенд заявок (версия в пути sock = из шага 6.1)
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
     }
 
     # Защита: база заявок и исходники бэкенда недоступны извне
@@ -203,7 +203,7 @@ cd /var/www/dez && git pull
 ## Типичные проблемы
 | Симптом | Причина / решение |
 |---|---|
-| 502 Bad Gateway при POST /api.php | Не запущен php8.1-fpm: `systemctl status php8.1-fpm`; проверьте путь sock в конфиге |
+| 502 Bad Gateway при POST /api.php | Не запущен php8.3-fpm: `systemctl status php8.3-fpm`; проверьте путь sock в конфиге |
 | «unable to open database file» | Нет прав на запись: `chown -R www-data:www-data /var/www/dez` |
 | Заявки идут, Telegram молчит | Ошиблись CHAT_ID (он отрицательный для групп); проверьте getUpdates |
 | CORS-ошибка в консоли браузера | api.php уже отдаёт Access-Control-Allow-Origin; убедитесь, что фронт стучится именно на /api.php вашего домена |
