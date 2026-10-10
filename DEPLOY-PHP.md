@@ -1,146 +1,145 @@
-# Вариант A — PHP + nginx (пошагово)
+# Дез-Комфорт — Вариант A (PHP + nginx) пошагово
 
-Шаги 0–3 (подключение, установка пакетов, git clone) см. выше в этом файле.
-Ниже — подробные шаги 4–10.
+Сервер: Ubuntu 22.04 / Debian 12, root-доступ по SSH. Каждый шаг проверяем командой.
 
-## Шаг 4. Настройка бэкенда (api.php)
-
-### 4.1 Скопируйте файл в корень сайта и откройте редактор
+## Шаг 0. Подключение к серверу
 ```bash
+ssh root@ВАШ_IP          # пароль от панели облачного провайдера
+# или с ключом: ssh -i ~/.ssh/id_ed25519 root@ВАШ_IP
+```
+
+## Шаг 1. Обновление системы и базовые утилиты
+```bash
+apt update && apt upgrade -y
+apt install -y curl git unzip ufw
+```
+
+## Шаг 2. Установка nginx + PHP-FPM + SQLite
+```bash
+apt install -y nginx php8.1-fpm php8.1-sqlite3 php8.1-mbstring php8.1-curl
+systemctl enable --now php8.1-fpm nginx
+php -m | grep -E 'sqlite|mbstring|curl'   # должны быть все три модуля
+```
+(если PHP 8.1 недоступен в вашем репозитории — `add-apt-repository ppa:ondrej/php`, либо поставьте php8.2 и дальше везде меняйте 8.1 → 8.2)
+
+## Шаг 3. Клонирование сайта
+```bash
+git clone https://github.com/egor1488zzz/qwen_site.git /var/www/dez
 cp /var/www/dez/backend/api.php /var/www/dez/api.php
-nano /var/www/dez/api.php
 ```
-(в nano: Ctrl+W — поиск, Ctrl+O + Enter — сохранить, Ctrl+X — выход)
 
-### 4.2 Найдите блок «НАСТРОЙТЕ ЭТИ ЗНАЧЕНИЯ» (строки ~18–21) и заполните 4 константы:
-
+## Шаг 4. Настройка api.php (открыть nano /var/www/dez/api.php, блок «НАСТРОЙТЕ ЭТИ ЗНАЧЕНИЯ»)
 ```php
-define('ADMIN_TOKEN', 'change-me-strong-token');  // → замените на свой длинный секрет
-define('TELEGRAM_BOT_TOKEN', '');                 // → '123456789:AA...' из @BotFather
-define('TELEGRAM_CHAT_ID', '');                   // → '-1001234567890' вашей группы
-define('CRM_WEBHOOK', '');                        // пока оставьте ''
+define('ADMIN_TOKEN', 'придумайте-длинную-секретную-строку'); // для выгрузки CSV
+define('TELEGRAM_BOT_TOKEN', '123456789:AA...');              // см. Шаг 4.1
+define('TELEGRAM_CHAT_ID', '-1001234567890');                 // см. Шаг 4.1
+define('CRM_WEBHOOK', '');                                    // пусто = выкл
 ```
+Сохранить: Ctrl+O, Enter, Ctrl+X.
 
-**ADMIN_TOKEN** — придумайте сами, 30+ символов без пробелов. Пример генерации:
-```bash
-openssl rand -hex 24
-```
-Скопируйте вывод и вставьте между кавычками. Это пароль от выгрузки заявок:
-`https://ваш-домен/api.php?token=ЭТОТ_ТОКЕН&export=csv`
+### 4.1 Как получить Telegram-токены (5 минут)
+1. В Telegram напишите боту @BotFather → `/newbot` → имя и username бота → получите **BOT_TOKEN**.
+2. Создайте группу/канал «Заявки Дез-Комфорт», добавьте туда бота.
+3. Отправьте в группу любое сообщение, затем откройте в браузере:
+   `https://api.telegram.org/bot<ВАШ_ТОКЕН>/getUpdates`
+4. В ответе найдите `"chat":{"id":-100XXXXXXXXXX}` — это **CHAT_ID** (для групп всегда отрицательный).
 
-**TELEGRAM_BOT_TOKEN — как получить (5 минут):**
-1. В Telegram найдите **@BotFather** → отправьте `/newbot` → введите имя («Дез-Комфорт Заявки») и username («dez_komfort_leads_bot»).
-2. BotFather пришлёт токен вида `123456789:AAH4x...` — скопируйте целиком, вставьте в кавычки.
+### 4.2 amoCRM/Bitrix24 (опционально)
+amoCRM: настройки → вебхуки → создать входящий вебхук на событие «создание сделки», URL вклеить в CRM_WEBHOOK. Пока можно оставить ''.
 
-**TELEGRAM_CHAT_ID — как получить:**
-1. Создайте группу (можно из одного себя), назовите «Заявки Дез-Комфорт».
-2. Добавьте в группу бота из шага выше (через «Добавить участника» → username бота).
-3. Отправьте в группу любое сообщение, например «тест».
-4. В браузере откройте (подставив свой токен):
-   `https://api.telegram.org/bot123456789:AAH4x.../getUpdates`
-5. В JSON найдите фрагмент `"chat":{"id":-1001234567890,...}` — число после "id" и есть CHAT_ID. У групп оно ВСЕГДА отрицательное, начинается с -100. Вставьте его в кавычки вместе с минусом.
-6. Если getUpdates пустой: удалите вебхук командой
-   `curl "https://api.telegram.org/bot<ТОКЕН>/deleteWebhook"` и отправьте сообщение заново.
-
-**CRM_WEBHOOK** — если уже пользуетесь amoCRM/Битрикс24, впишите URL входящего вебхука; иначе ''.
-
-### 4.3 Проверьте синтаксис после правки:
-```bash
-php -l /var/www/dez/api.php        # должно быть "No syntax errors detected"
-```
-
-## Шаг 5. Права доступа (иначе SQLite не сможет создать базу)
+## Шаг 5. Права доступа (важно: папка должна быть записываема для SQLite)
 ```bash
 chown -R www-data:www-data /var/www/dez
-chmod 775 /var/www/dez
-# база leads.db создастся сама при первой заявке — это нормально
+chmod -R 755 /var/www/dez
+chmod 775 /var/www/dez        # чтобы PHP создал leads.db в корне сайта
 ```
 
 ## Шаг 6. Конфиг nginx
-```bash
-nano /etc/nginx/sites-available/dez
-```
+Создайте файл `nano /etc/nginx/sites-available/dez`:
 ```nginx
 server {
     listen 80;
-    server_name dez-komfort.ru www.dez-komfort.ru;   # до теста домена можно _
+    server_name dez-komfort.ru www.dez-komfort.ru;   # домен А-записью на IP, или просто _ для IP
     root /var/www/dez;
     index index.html;
+
     charset utf-8;
 
-    location / { try_files $uri $uri/ =404; }
-
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.1-fpm.sock;   # версия php как установлена
+    location / {
+        try_files $uri $uri/ =404;
     }
 
-    # защита базы заявок и исходников бэкенда
+    # PHP-бэкенд заявок
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
+    }
+
+    # Защита: база заявок и скрытые файлы недоступны извне
     location ~ /(\.ht|leads\.db|backend/) { deny all; }
 
-    gzip on;
-    gzip_types text/css application/javascript image/svg+xml application/json;
+    # Сжатие и кеши статики
+    gzip on; gzip_types text/css application/javascript image/svg+xml;
+    location ~* \.(css|js|svg|woff2)$ { expires 7d; add_header Cache-Control "public"; }
 }
 ```
-Активация:
+Включить сайт:
 ```bash
-ln -sf /etc/nginx/sites-available/dez /etc/nginx/sites-enabled/dez
+ln -s /etc/nginx/sites-available/dez /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 ```
 
-## Шаг 7. Firewall + первая проверка
+## Шаг 7. firewall + проверка в браузере
 ```bash
-ufw allow OpenSSH; ufw allow 'Nginx Full'; ufw --force enable
-curl -I http://localhost/                # ждём HTTP/1.1 200 OK
-curl -I http://ВАШ_IP/                   # с вашего компьютера тоже 200
+ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw --force enable
+curl -I http://ВАШ_IP/            # HTTP/1.1 200 OK
 ```
 
 ## Шаг 8. Домен и бесплатный HTTPS
-1. У регистратора: А-запись `@` и `www` → IP сервера. Подождите 10–30 мин, проверьте: `dig +short dez-komfort.ru`.
+1. У регистратора (reg.ru и т.п.) поставьте **А-запись** домена на IP сервера (и www → тот же IP). Подождите 10–30 мин: `ping ваш-домен` должен показать IP сервера.
 2. ```bash
    apt install -y certbot python3-certbot-nginx
    certbot --nginx -d dez-komfort.ru -d www.dez-komfort.ru
+   # выбрать Redirect — чтобы всё вело на https
    ```
-   На вопрос про редирект выберите **2 (Redirect)** — сайт всегда по https.
-3. Автопродление работает через systemd-таймер (проверка: `certbot renew --dry-run`).
+3. Автопродление работает само; проверка: `certbot renew --dry-run`.
 
-## Шаг 9. Переключить сайт на живой приём заявок
-В репозитории в файле `js/config.js` уже прописан правильный адрес эндпоинта (`/api.php`). Осталось поменять режим:
-```bash
-sed -i "s/leadMode: 'demo'/leadMode: 'endpoint'/" /var/www/dez/js/config.js
+## Шаг 9. Переключение сайта на живой приём заявок
+Отредактируйте на сервере `nano /var/www/dez/js/config.js`:
+```js
+leadMode: 'endpoint',
+leadEndpoint: '/api.php',
+siteUrl: 'https://dez-komfort.ru'     // новый домен для canonical/og
 ```
-Правильнее делать это через GitHub (commit + push), а на сервере:
-```bash
-cd /var/www/dez && git pull
-```
-Если правили файлы прямо на сервере и pull ругается: `git stash && git pull`.
+(или правьте в GitHub и делайте `cd /var/www/dez && git pull`)
 
-Заодно обновите `siteUrl: 'https://dez-komfort.ru'` в config.js (нужно для canonical/шеров).
+⚠ Если правили напрямую на сервере — не делайте `git pull` без `git stash`, иначе локальные изменения конфликтуют. Правильно: коммитьте config.js в репозиторий после переключения.
 
 ## Шаг 10. Финальная проверка
 ```bash
+# заявка через API:
 curl -X POST https://dez-komfort.ru/api.php \
   -H 'Content-Type: application/json' \
   -d '{"name":"Тест","phone":"+79990000000","city":"Москва","service":"Клопы"}'
+# ожидаем {"ok":true,...} и сообщение в Telegram-группе
+
+# выгрузка заявок CSV в браузере:
+https://dez-komfort.ru/api.php?token=ВАШ_ADMIN_TOKEN&export=csv
 ```
-Ожидаемый ответ: `{"ok":true,...}`, а в Telegram-группу падает сообщение о заявке.
-Заявка также появилась в базе:
+Затем откройте сайт, отправьте форму заявки — должно прийти уведомление в Telegram, запись появиться в leads.db.
+
+## Обновление сайта в будущем
 ```bash
-ls -la /var/www/dez/backend/leads.db
+cd /var/www/dez && git pull
 ```
-Выгрузка Excel/CSV: откройте в браузере
-`https://dez-komfort.ru/api.php?token=ВАШ_ADMIN_TOKEN&export=csv`
+(api.php лежит в корне прод-копии отдельной копией — после pull обновляйте его: `cp backend/api.php api.php`, если менялся.)
 
-Затем откройте сам сайт, отправьте форму «Заказать звонок» — заявка должна прийти в Telegram.
-
----
-## Типовые проблемы
+## Типичные проблемы
 | Симптом | Причина / решение |
 |---|---|
-| 502 Bad Gateway | php-fpm не запущен или сокет другой версии: `systemctl status php8.1-fpm`, проверьте путь сокета в /etc/php/8.1/fpm/pool.d/www.conf |
-| «Unable to open database» в ответе API | права: `chown -R www-data:www-data /var/www/dez` |
-| Telegram не шлёт | неверный CHAT_ID (должен быть с минусом) или бот не добавлен в группу; проверьте `curl "https://api.telegram.org/bot<Т>/sendMessage?chat_id=<ID>&text=test"` |
-| 403 на /api.php | правило deny перекрывает php-location — убедитесь, что `location ~ \.php$` идёт раньше правила с leads.db и что api.php не лежит в /backend/ |
-| CORS ошибка в браузере | api.php сам отдаёт Access-Control-Allow-Origin — проверяйте, что запрос идёт на тот же домен, что и сайт |
-| Заявки уходят, но на сайте «демо» | в config.js всё ещё leadMode:'demo' — см. шаг 9 |
+| 502 Bad Gateway при POST /api.php | Не запущен php8.1-fpm: `systemctl status php8.1-fpm`; проверьте путь sock в конфиге |
+| «unable to open database file» | Нет прав на запись: `chown -R www-data:www-data /var/www/dez` |
+| Заявки идут, Telegram молчит | Ошиблись CHAT_ID (он отрицательный для групп); проверьте getUpdates |
+| CORS-ошибка в консоли браузера | api.php уже отдаёт Access-Control-Allow-Origin; убедитесь, что фронт стучится именно на /api.php вашего домена |
+| Сертификат не выпускается | Домен ещё не указывает на IP — проверьте `dig ваш-домен` |
