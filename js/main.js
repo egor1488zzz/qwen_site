@@ -98,7 +98,13 @@
       const cTel = document.getElementById('cPhone');
       if (cTel && city) { cTel.href = 'tel:' + city.phone; cTel.textContent = city.display; }
       const cAddr = document.getElementById('cAddress');
-      if (cAddr && city) cAddr.textContent = city.address;
+      if (cAddr && city) {
+        /* Адрес филиала + всегда показываем головной офис (Солнечная ул., Сосновоборск) */
+        const gOff = (window.DEZ_CONFIG && window.DEZ_CONFIG.officeAddress) || 'Солнечная улица, Сосновоборск, Красноярский край';
+        cAddr.innerHTML = city.address === gOff || city.slug === 'krsk'
+          ? gOff
+          : city.address + '<br><small>Головной офис: ' + gOff + '</small>';
+      }
       const cMsgr = document.getElementById('cMessenger');
       if (cMsgr) cMsgr.innerHTML = '<a href="' + tgHref('Здравствуйте! Заказ дезинсекции, город: ' + (city ? city.name : name)) + '" target="_blank" rel="noopener">Написать в Telegram (DezComfort)</a>';
       if (heroCity && !heroCity.value) heroCity.value = city ? city.name : name;
@@ -110,8 +116,26 @@
       document.dispatchEvent(new CustomEvent('dez:city', { detail: city ? city.name : name }));
     }
 
-    function openDrop() { drop.hidden = false; btn.setAttribute('aria-expanded', 'true'); search.focus(); renderList(search.value); }
+    function openDrop() {
+      drop.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      positionDrop();
+      search.focus(); renderList(search.value);
+    }
     function closeDrop() { if (!drop.hidden) { drop.hidden = true; btn.setAttribute('aria-expanded', 'false'); } }
+    /* Фиксированное статичное позиционирование под кнопкой (не зависит от анимаций/overflow шапки) */
+    function positionDrop() {
+      const r = btn.getBoundingClientRect();
+      const vw = document.documentElement.clientWidth;
+      const w = Math.min(300, vw * 0.92);
+      let left = r.left;
+      if (left + w > vw - 8) left = Math.max(8, vw - w - 8);
+      drop.style.width = w + 'px';
+      drop.style.left = left + 'px';
+      drop.style.top = (r.bottom + 10) + 'px';
+    }
+    window.addEventListener('resize', () => { if (!drop.hidden) positionDrop(); });
+    window.addEventListener('scroll', () => { if (!drop.hidden) positionDrop(); }, true);
 
     btn.addEventListener('click', e => { e.stopPropagation(); drop.hidden ? openDrop() : closeDrop(); });
     search.addEventListener('input', () => renderList(search.value));

@@ -8,7 +8,7 @@
 
   var STORE_KEY = 'dez_city';
   var MANUAL_KEY = 'dez_city_manual'; // город выбран вручную — не перекрывать автоопределением
-  var DEFAULT_CITY = 'Москва';
+  var DEFAULT_CITY = 'Красноярск'; // головной офис: Солнечная ул., Сосновоборск, Красноярский край
 
   function getSaved() {
     try { return localStorage.getItem(STORE_KEY); } catch (e) { return null; }
@@ -40,12 +40,15 @@
   function normalize(raw) {
     if (!raw) return null;
     var s = String(raw).trim();
+    // Сосновоборск — город-спутник Красноярска, головной офис компании
+    if (/сосновобор/i.test(s)) return 'Красноярск';
     // транслит базовый для популярных случаев
     var translit = {
       moscow: 'Москва', spb: 'Санкт-Петербург', saintpetersburg: 'Санкт-Петербург',
       kazan: 'Казань', ekaterinburg: 'Екатеринбург', samara: 'Самара',ufa: 'Уфа',
       novosibirsk: 'Новосибирск', krasnodar: 'Краснодар', rostov: 'Ростов-на-Дону',
-      nizhny: 'Нижний Новгород', voronezh: 'Воронеж', perm: 'Пермь', sochi: 'Сочи'
+      nizhny: 'Нижний Новгород', voronezh: 'Воронеж', perm: 'Пермь', sochi: 'Сочи',
+      krasnoyarsk: 'Красноярск', sosnovoborsk: 'Красноярск'
     };
     var low = s.toLowerCase().replace(/[^a-zа-яё -]/gi, '');
     for (var k in translit) if (low.indexOf(k) === 0) return translit[k];
