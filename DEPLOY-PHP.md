@@ -70,12 +70,29 @@ chmod -R 755 /var/www/dez
 chmod 775 /var/www/dez        # чтобы PHP создал leads.db в корне сайта
 ```
 
-## Шаг 6. Конфиг nginx
-Создайте файл `nano /etc/nginx/sites-available/dez`:
+## Шаг 6. Конфиг nginx — пошагово, с проверками
+
+### 6.1 Узнаём точную версию PHP (важно: путь sock должен совпадать!)
+```bash
+php -v                       # например "PHP 8.1.2-1ubuntu2" → версия 8.1
+ls /run/php/                 # должен показать php8.1-fpm.sock — запомните имя файла
+```
+Если там, скажем, `php8.2-fpm.sock` — везде ниже в конфиге используйте 8.2.
+
+### 6.2 Создаём конфиг сайта
+Откройте редактор (одна команда, файл создастся сам):
+```bash
+nano /etc/nginx/sites-available/dez
+```
+Вставка текста в nano: правой кнопкой мыши (или Ctrl+Shift+V в терминале).
+Аккуратно вставьте ВЕСЬ блок ниже — от `server {` до последнего `}`.
+Кавычки должны быть прямыми `"`, не «ёлочками» (не копируйте из мессенджеров!).
+Сохранение: **Ctrl+O → Enter**, выход: **Ctrl+X**.
+
 ```nginx
 server {
     listen 80;
-    server_name dez-komfort.ru www.dez-komfort.ru;   # домен А-записью на IP, или просто _ для IP
+    server_name dez-komfort.ru www.dez-komfort.ru;   # ваш домен; если домена ещё нет — напишите просто: _
     root /var/www/dez;
     index index.html;
 
@@ -85,26 +102,52 @@ server {
         try_files $uri $uri/ =404;
     }
 
-    # PHP-бэкенд заявок
+    # PHP-бэкенд заявок (версия в пути sock = из шага 6.1)
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php8.1-fpm.sock;
     }
 
-    # Защита: база заявок и скрытые файлы недоступны извне
+    # Защита: база заявок и исходники бэкенда недоступны извне
     location ~ /(\.ht|leads\.db|backend/) { deny all; }
 
-    # Сжатие и кеши статики
-    gzip on; gzip_types text/css application/javascript image/svg+xml;
-    location ~* \.(css|js|svg|woff2)$ { expires 7d; add_header Cache-Control "public"; }
+    # Сжатие и кеширование статики
+    gzip on;
+    gzip_types text/css application/javascript image/svg+xml;
+    location ~* \.(css|js|svg|woff2)$ {
+        expires 7d;
+        add_header Cache-Control "public";
+    }
 }
 ```
-Включить сайт:
+
+### 6.3 Проверяем синтаксис ДО включения
 ```bash
-ln -s /etc/nginx/sites-available/dez /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-enabled/default
-nginx -t && systemctl reload nginx
+nginx -t
 ```
+Ожидаем:
+```
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+Если ошибка — nginx укажет файл и строку (например `unknown directive` или `unexpected "}"`). Частые причины: лишняя/недостающая `{ }`, пропущена `;` в конце строки, кириллические кавычки. Исправьте в nano и повторите `nginx -t`.
+
+### 6.4 Включаем сайт (символьная ссылка) и убираем дефолт
+```bash
+ln -sf /etc/nginx/sites-available/dez /etc/nginx/sites-enabled/dez
+rm -f /etc/nginx/sites-enabled/default
+ls -l /etc/nginx/sites-enabled/     # должна быть толькоdez -> .../sites-available/dez
+systemctl reload nginx
+```
+Перезагрузка без даунтайма — именно `reload` (не `restart`). Если `reload` не помог после правок — `systemctl restart nginx`.
+
+### 6.5 Быстрая проверка результата
+```bash
+curl -I http://localhost/                    # ожидаем HTTP/1.1 200 OK
+curl -I http://localhost/api.php             # 200 или 405 — значит PHP работает (502 = см. таблицу проблем)
+curl -I http://localhost/backend/            # ожидаем 403 Forbidden — защита сработала
+```
+Если localhost отдаёт 200, а по IP из браузера — нет, это firewall (Шаг 7), а не nginx.
 
 ## Шаг 7. firewall + проверка в браузере
 ```bash
