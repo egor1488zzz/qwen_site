@@ -12,7 +12,7 @@ window.DEZ_CONFIG = {
        ⚠ Для telegram-варианта публичный токен виден в коде — используйте
          отдельного бота только для входящих заявок. */
   leadMode: 'demo',                    // 'demo' | 'endpoint' | 'telegram'
-  leadEndpoint: '/api/lead.php',       // URL бэкенда при leadMode='endpoint'
+  leadEndpoint: '/api.php',            // URL бэкенда при leadMode='endpoint' (файл лежит в корне сайта)
 
   telegram: {
     botToken: '',                      // '123456789:AA...токен бота'
